@@ -38,7 +38,8 @@ ADJACENT = _poly([
 
 
 @pytest.fixture
-async def conn():
+async def db():
+    """yield (conn, test_user)：asyncpg.Connection 有 __slots__，不能附加屬性."""
     c = await asyncpg.connect(TEST_DB)
     # Supabase auth.users 需要真實使用者才能滿足 FK；建立測試用假使用者
     test_user = uuid.uuid4()
@@ -46,19 +47,18 @@ async def conn():
         "insert into auth.users (id, email) values ($1, $2)",
         test_user, f"test-{test_user}@example.com",
     )
-    c.test_user = test_user
-    yield c
+    yield c, test_user
     # 清理：刪測試資料（cascade 清 estimates）與測試使用者
     await c.execute("delete from forest_plots where owner_id = $1", test_user)
     await c.execute("delete from auth.users where id = $1", test_user)
     await c.close()
 
 
-async def _insert(c, geometry, name="測試林區"):
+async def _insert(c, owner_id, geometry, name="測試林區"):
     area = polygon_area_ha(geometry)
     return await queries.insert_plot_with_estimates(
         c,
-        owner_id=c.test_user,
+        owner_id=owner_id,
         name=name,
         species="taiwania",
         avg_age=15,
@@ -70,8 +70,9 @@ async def _insert(c, geometry, name="測試林區"):
     )
 
 
-async def test_insert_writes_plot_and_six_estimates(conn):
-    plot = await _insert(conn, BASE)
+async def test_insert_writes_plot_and_six_estimates(db):
+    conn, user = db
+    plot = await _insert(conn, user, BASE)
     assert plot["status"] == "chain_pending"
     count = await conn.fetchval(
         "select count(*) from carbon_estimates where plot_id = $1", uuid.UUID(plot["id"])
@@ -79,27 +80,31 @@ async def test_insert_writes_plot_and_six_estimates(conn):
     assert count == 6
 
 
-async def test_overlap_detected(conn):
-    await _insert(conn, BASE)
+async def test_overlap_detected(db):
+    conn, user = db
+    await _insert(conn, user, BASE)
     conflicts = await queries.find_overlaps(conn, OVERLAPPING)
     assert len(conflicts) == 1
     assert conflicts[0]["overlap_ha"] > 0.001
     assert conflicts[0]["overlap_geojson"]["type"] in ("Polygon", "MultiPolygon")
 
 
-async def test_adjacent_not_flagged(conn):
-    await _insert(conn, BASE)
+async def test_adjacent_not_flagged(db):
+    conn, user = db
+    await _insert(conn, user, BASE)
     assert await queries.find_overlaps(conn, ADJACENT) == []
 
 
-async def test_duplicate_geo_hash_raises_unique_violation(conn):
-    await _insert(conn, BASE)
+async def test_duplicate_geo_hash_raises_unique_violation(db):
+    conn, user = db
+    await _insert(conn, user, BASE)
     with pytest.raises(asyncpg.UniqueViolationError):
-        await _insert(conn, BASE, name="重複幾何")
+        await _insert(conn, user, BASE, name="重複幾何")
 
 
-async def test_list_and_get(conn):
-    plot = await _insert(conn, BASE)
+async def test_list_and_get(db):
+    conn, user = db
+    plot = await _insert(conn, user, BASE)
     plots = await queries.list_plots(conn)
     assert any(p["id"] == plot["id"] for p in plots)
     detail = await queries.get_plot(conn, uuid.UUID(plot["id"]))
