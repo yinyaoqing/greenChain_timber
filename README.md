@@ -81,7 +81,7 @@ npm run deploy:amoy                     # 需 .env 私鑰 + Amoy 測試幣
 
 | 範圍 | 指令 | 說明 |
 |---|---|---|
-| 後端單元 | `cd backend && uv run pytest` | 79 tests；整合測試需 `TEST_DATABASE_URL` |
+| 後端單元 | `cd backend && uv run pytest` | 85 tests（其中 6 個整合測試需 `TEST_DATABASE_URL`，未設定時自動 skip） |
 | 合約 | `cd contracts && npx hardhat test` | mint/權限/geoHash 唯一性/tokenURI |
 | 前端 | `cd frontend && npm run lint && npm run build` | 型別檢查 + prerender |
 | AT-6 雜湊驗證 | `cd backend && uv run python scripts/verify_hash.py` | DB 重算 vs 鏈上 geoHash |
