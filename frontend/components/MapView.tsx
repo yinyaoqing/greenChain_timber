@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -18,6 +18,7 @@ export default function MapView({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onReadyRef = useRef(onReady);
+  const [mapError, setMapError] = useState(false);
   useEffect(() => {
     onReadyRef.current = onReady;
   }, [onReady]);
@@ -34,7 +35,9 @@ export default function MapView({
       antialias: true,
     });
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
+    const loadedRef = { current: false };
     map.on("style.load", () => {
+      loadedRef.current = true;
       map.addSource("mapbox-dem", {
         type: "raster-dem",
         url: "mapbox://mapbox.mapbox-terrain-dem-v1",
@@ -44,8 +47,19 @@ export default function MapView({
       map.setTerrain({ source: "mapbox-dem", exaggeration: 1.4 });
       onReadyRef.current?.(map);
     });
+    map.on("error", (e) => {
+      if (!loadedRef.current && e?.error) setMapError(true);
+    });
     return () => map.remove();
   }, []);
 
-  return <div ref={containerRef} className={className ?? "h-full w-full"} />;
+  return (
+    <div ref={containerRef} className={className ?? "h-full w-full"} style={{ position: "relative" }}>
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 p-6 text-center text-sm text-stone-600">
+          地圖載入失敗——請確認 frontend/.env.local 的 NEXT_PUBLIC_MAPBOX_TOKEN 已填入有效 token 後重啟 dev server
+        </div>
+      )}
+    </div>
+  );
 }

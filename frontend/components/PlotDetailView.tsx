@@ -51,12 +51,13 @@ function fitToPolygon(map: mapboxgl.Map, geometry: GeoJSON.Polygon) {
 
 export default function PlotDetailView({ plotId }: { plotId: string }) {
   const [plot, setPlot] = useState<PlotDetail | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState(false);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
 
   useEffect(() => {
     getForest(plotId)
       .then(setPlot)
-      .catch(() => setPlot(null));
+      .catch(() => setLoadError(true));
   }, [plotId]);
 
   const onMapReady = useCallback((m: mapboxgl.Map) => setMap(m), []);
@@ -68,6 +69,16 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
     }
   }, [map, plot]);
 
+  if (loadError) {
+    return (
+      <div className="p-12 text-center">
+        <p className="text-stone-600">無法連線後端服務，請確認 API 是否啟動</p>
+        <Link href="/dashboard" className="mt-2 inline-block text-emerald-700 underline">
+          ← 回儀表板
+        </Link>
+      </div>
+    );
+  }
   if (plot === undefined) return <p className="p-8 text-stone-500">載入中…</p>;
   if (plot === null) {
     return (
