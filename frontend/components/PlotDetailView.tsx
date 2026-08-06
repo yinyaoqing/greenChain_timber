@@ -9,6 +9,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { getChainStatus, getForest } from "@/lib/api";
 import type { PlotDetail } from "@/lib/types";
 import { SPECIES_LABEL } from "@/lib/types";
+import { formatHa } from "@/lib/format";
 
 function addPlotLayer(map: mapboxgl.Map, geometry: GeoJSON.Polygon) {
   if (map.getSource("plot")) return;
@@ -138,7 +139,7 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
               </div>
               <div className="flex justify-between">
                 <dt>面積</dt>
-                <dd>{plot.area_ha.toFixed(4)} ha</dd>
+                <dd>{formatHa(plot.area_ha)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt>建立時間</dt>
