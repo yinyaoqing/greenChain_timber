@@ -43,3 +43,12 @@
 - curl 四情境全過（真實 ES256 JWT）：401 無 token／201 完整申報（6 筆估算）／409 重疊（overlap_ha 9.8602 + 衝突 GeoJSON）／422 自相交
 - 展示資料：「延文實驗林場 A 區」（台灣杉/15年/1500株/19.72 ha）已入庫，狀態 chain_pending
 - 明天起：W2 前端計畫（Next.js + Mapbox）
+
+## 2026-08-07 — M2 里程碑達成 ✅（W2 前端完成）
+
+- W2 Tasks 1–9 以 subagent-driven TDD 完成（12 commits）：Landing/Auth/3D 圈地/表單三回應/儀表板/詳情頁
+- 最終全分支審查修復：地圖載入失敗提示、繪製工具自動轉俯視（3D 地形點偏 mitigation）、詳情頁連線錯誤區分 404、註冊確認信防跳轉迴圈
+- 手動 E2E 六項全過（使用者親測）：AuthGuard 導向／圈地→201 成功卡+曲線／儀表板→詳情飛行定位／409 紅色高亮／<0.1 ha 前端阻擋／免責標示雙處
+- 版本紀錄：實際為 Next.js 16.3、recharts 3.10（計畫寫 15/2，程式碼已相應調整）；表單為點擊開啟而非自動彈出（UX 決策，記錄備查）
+- W3 待辦（審查遺留）：GET 401 導登入、conflict helpers 抽到 lib/、AuthGuard returnTo、CarbonChart 基準年改 created_at
+- 明天起：W3 區塊鏈計畫（Hardhat + GreenAssetNFT + chain_service）
