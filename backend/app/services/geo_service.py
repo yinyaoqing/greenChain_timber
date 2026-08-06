@@ -78,7 +78,13 @@ def validate_polygon(geometry: dict) -> None:
     if vertex_count > MAX_VERTICES:
         raise GeometryError("too_many_vertices", f"頂點數 {vertex_count} 超過上限 {MAX_VERTICES}")
 
-    geom = shape(geometry)
+    if len(geometry["coordinates"]) > 1:
+        raise GeometryError("holes_not_allowed", "多邊形不可包含內環（孔洞）")
+
+    try:
+        geom = shape(geometry)
+    except (ValueError, TypeError) as exc:
+        raise GeometryError("invalid_type", f"geometry 座標結構無效: {exc}") from exc
     if not geom.is_valid:
         raise GeometryError("self_intersection", f"多邊形無效：{explain_validity(geom)}")
 

@@ -14,6 +14,7 @@ from app.services.carbon_calc import estimate_carbon
 from app.services.geo_service import (
     GeometryError,
     geometry_hash,
+    normalize_geometry,
     polygon_area_ha,
     validate_polygon,
 )
@@ -46,8 +47,10 @@ async def submit_forest(
             status_code=422, detail={"code": exc.code, "message": exc.message}
         ) from exc
 
+    geometry = normalize_geometry(body.geometry)
+
     # 2. 面積範圍（FR-2.4 後端複驗）—— 422
-    area_ha = polygon_area_ha(body.geometry)
+    area_ha = polygon_area_ha(geometry)
     if not MIN_AREA_HA <= area_ha <= MAX_AREA_HA:
         raise HTTPException(
             status_code=422,
@@ -58,7 +61,7 @@ async def submit_forest(
         )
 
     # 3. 防重疊（FR-3.1–3.2）—— 409
-    conflicts = await queries.find_overlaps(conn, body.geometry)
+    conflicts = await queries.find_overlaps(conn, geometry)
     if conflicts:
         raise HTTPException(status_code=409, detail={"conflicts": conflicts})
 
@@ -72,9 +75,9 @@ async def submit_forest(
             species=body.species,
             avg_age=body.avg_age,
             density=body.density,
-            geometry=body.geometry,
+            geometry=geometry,
             area_ha=area_ha,
-            geo_hash=geometry_hash(body.geometry),
+            geo_hash=geometry_hash(geometry),
             estimate=estimate,
         )
     except asyncpg.UniqueViolationError as exc:

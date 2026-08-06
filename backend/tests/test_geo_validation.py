@@ -73,6 +73,38 @@ class TestValidatePolygon:
         ]
         validate_polygon(_poly(tri))  # 不應 raise
 
+    def test_ragged_ring_rejected_as_invalid_type(self):
+        ragged = [[121.75, 24.72], [121.76], [121.75, 24.71], [121.75, 24.72]]
+        with pytest.raises(GeometryError) as exc:
+            validate_polygon(_poly(ragged))
+        assert exc.value.code == "invalid_type"
+
+    def test_non_numeric_coordinate_rejected_as_invalid_type(self):
+        bad = [[121.75, "x"], [121.76, 24.72], [121.75, 24.71], [121.75, "x"]]
+        with pytest.raises(GeometryError) as exc:
+            validate_polygon(_poly(bad))
+        assert exc.value.code == "invalid_type"
+
+    def test_holes_rejected(self):
+        outer = [
+            [121.750, 24.726],
+            [121.758, 24.726],
+            [121.758, 24.720],
+            [121.750, 24.720],
+            [121.750, 24.726],
+        ]
+        inner = [
+            [121.753, 24.724],
+            [121.755, 24.724],
+            [121.755, 24.722],
+            [121.753, 24.722],
+            [121.753, 24.724],
+        ]
+        donut = {"type": "Polygon", "coordinates": [outer, inner]}
+        with pytest.raises(GeometryError) as exc:
+            validate_polygon(donut)
+        assert exc.value.code == "holes_not_allowed"
+
 
 class TestPolygonAreaHa:
     def test_area_close_to_expected(self):

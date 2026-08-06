@@ -35,7 +35,7 @@ async def healthz():
     db = "down"
     if app.state.pool is not None:
         try:
-            async with app.state.pool.acquire() as conn:
+            async with app.state.pool.acquire(timeout=5) as conn:
                 await conn.fetchval("select 1")
             db = "up"
         except Exception:

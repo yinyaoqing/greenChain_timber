@@ -101,6 +101,22 @@ def test_outside_taiwan_422(client):
     assert resp.json()["detail"]["code"] == "out_of_taiwan_bbox"
 
 
+def test_malformed_ragged_coordinates_422(client):
+    body = {
+        **VALID_BODY,
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [121.752, 24.725], [121.756], [121.756, 24.7206],
+                [121.752, 24.7206], [121.752, 24.725],
+            ]],
+        },
+    }
+    resp = client.post("/api/forest", json=body)
+    assert resp.status_code == 422
+    assert resp.json()["detail"]["code"] == "invalid_type"
+
+
 def test_area_too_small_422(client):
     # 約 0.01 ha 的微小多邊形（< 0.1 ha 下限）
     body = {

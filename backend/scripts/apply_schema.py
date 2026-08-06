@@ -22,6 +22,7 @@ async def main() -> None:
                     database_url = line.split("=", 1)[1].strip()
     if not database_url:
         sys.exit("DATABASE_URL 未設定（環境變數或 backend/.env）")
+    database_url = database_url.strip().strip('"\'')
 
     sql = (
         pathlib.Path(__file__).resolve().parents[1] / "app" / "db" / "schema.sql"

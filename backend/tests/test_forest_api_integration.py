@@ -42,6 +42,7 @@ def client_with_user():
 
     app.dependency_overrides[get_current_user_id] = fake_user
     # 整合測試用真實 pool：把 app 的 DATABASE_URL 換成 TEST_DATABASE_URL
+    prev_database_url = os.environ.get("DATABASE_URL")
     os.environ["DATABASE_URL"] = TEST_DB
     from app.core.settings import get_settings
 
@@ -70,6 +71,10 @@ def client_with_user():
 
     asyncio.run(_teardown())
     app.dependency_overrides.clear()
+    if prev_database_url is None:
+        os.environ.pop("DATABASE_URL", None)
+    else:
+        os.environ["DATABASE_URL"] = prev_database_url
     get_settings.cache_clear()
 
 
