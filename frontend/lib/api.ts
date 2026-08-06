@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Conflict, ForestSubmission, PlotDetail, PlotListItem, SubmitSuccess } from "@/lib/types";
+import type { ChainStatus, Conflict, ForestSubmission, PlotDetail, PlotListItem, SubmitSuccess } from "@/lib/types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -74,5 +74,10 @@ export async function listForest(): Promise<PlotListItem[]> {
 
 export async function getForest(id: string): Promise<PlotDetail | null> {
   const { data } = await authedGet<PlotDetail>(`/api/forest/${id}`);
+  return data;
+}
+
+export async function getChainStatus(id: string): Promise<ChainStatus | null> {
+  const { data } = await authedGet<ChainStatus>(`/api/forest/${id}/chain-status`);
   return data;
 }
