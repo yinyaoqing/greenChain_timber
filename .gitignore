@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# 環境變數（秘密管理紅線：絕不進版控）
+.env
+.env.*
+!.env.example
+
+# Node（W2 起使用）
+node_modules/
+.next/
+
+# Hardhat（W3 起使用）
+contracts/artifacts/
+contracts/cache/
+
+# 編輯器
+.vscode/
+.idea/
