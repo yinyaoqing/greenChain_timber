@@ -59,6 +59,7 @@ interface DrawState {
 export default function DrawPanel() {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
+  const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
   const [drawState, setDrawState] = useState<DrawState>({
     geometry: null,
     areaHa: 0,
@@ -86,6 +87,7 @@ export default function DrawPanel() {
   const onMapReady = useCallback(
     (map: mapboxgl.Map) => {
       mapRef.current = map;
+      setMapInstance(map);
       const draw = new MapboxDraw({
         displayControlsDefault: false,
         controls: { polygon: true, trash: true },
@@ -177,7 +179,7 @@ export default function DrawPanel() {
           <PlotForm
             geometry={geometry}
             areaHa={areaHa}
-            map={mapRef.current}
+            map={mapInstance}
             onReset={resetDrawing}
           />
         </div>
