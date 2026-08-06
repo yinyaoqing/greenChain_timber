@@ -23,3 +23,12 @@
 - **auth.users 直插假設**：整合測試依賴可直接 insert `auth.users`；若 Supabase 約束不允許，需改用 TEST_USER_ID 環境變數（Task 8 Step 4 已留備註）
 
 ---
+
+## M1 上線前檢查清單
+
+1. Supabase 專案建立後，確認使用 legacy HS256 JWT secret：若專案預設為非對稱簽名金鑰（ES256），後端 `jwt.decode(algorithms=["HS256"])` 會全數 401——屆時需改為 JWKS 驗證。
+2. IPv4 網路環境請使用 Session Pooler 連線字串（`aws-*.pooler.supabase.com:5432`，勿用 6543 transaction pooler）。
+3. 整合測試的 `auth.users` 直插假設：若 Supabase 約束不允許直接 insert，需改用 TEST_USER_ID 方案。
+4. 上線流程：套用 schema → 執行整合測試 → curl 三情境驗證 → 打上 `m1-backend` tag。
+
+---
