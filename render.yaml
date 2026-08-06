@@ -1,0 +1,23 @@
+# Render Blueprint — 後端自動部署（Dashboard → New → Blueprint → 選本 repo）
+# 環境變數值不進版控（sync: false = 於 Dashboard 首次部署時填入，見 docs/deploy.md）
+services:
+  - type: web
+    name: greenchain-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
