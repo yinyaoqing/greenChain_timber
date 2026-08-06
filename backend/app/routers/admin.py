@@ -1,5 +1,6 @@
 """管理端點（簡易保護：X-Admin-Token header，FR-5.3 手動補鑄）."""
 
+import secrets
 import uuid
 
 import asyncpg
@@ -22,7 +23,9 @@ async def retry_pending(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     settings = get_settings()
-    if not settings.admin_token or x_admin_token != settings.admin_token:
+    if not settings.admin_token or not secrets.compare_digest(
+        x_admin_token or "", settings.admin_token
+    ):
         raise HTTPException(status_code=403, detail="forbidden")
     rows = await conn.fetch(_PENDING_SQL)
     for row in rows:

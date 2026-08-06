@@ -20,6 +20,16 @@ class FakeConn:
     async def execute(self, sql, *args):
         self.executed.append((sql.strip().split()[0].lower(), args))
 
+    def transaction(self):
+        class _Txn:
+            async def __aenter__(self):
+                return None
+
+            async def __aexit__(self, *a):
+                return False
+
+        return _Txn()
+
 
 class FakePool:
     def __init__(self, conn):
@@ -118,6 +128,19 @@ async def test_chain_not_configured_skips(monkeypatch):
 
     assert mint.call_count == 0
     assert conn.executed == []
+
+
+async def test_already_minted_stops_retrying(chain_env, monkeypatch):
+    conn = FakeConn(PLOT_ROW)
+    mint = MagicMock(side_effect=chain_service.ChainAlreadyMinted("already"))
+    monkeypatch.setattr(chain_service, "_mint_fn", mint)
+
+    await chain_service.mint_and_record(FakePool(conn), PLOT_ID)
+
+    assert mint.call_count == 1
+    verbs = [v for v, _ in conn.executed]
+    assert verbs.count("insert") == 1
+    assert "update" not in verbs
 
 
 async def test_plot_not_pending_skips(chain_env, monkeypatch):

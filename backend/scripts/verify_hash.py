@@ -8,6 +8,7 @@
 
 import asyncio
 import json
+import os
 import pathlib
 import sys
 
@@ -28,6 +29,13 @@ def _load_env() -> dict[str, str]:
             if "=" in line and not line.strip().startswith("#"):
                 key, _, value = line.partition("=")
                 env[key.strip()] = value.strip().strip('"\'')
+    env.update(
+        {
+            k: v
+            for k, v in os.environ.items()
+            if k in ("DATABASE_URL", "CHAIN_RPC_URL", "NFT_CONTRACT_ADDRESS")
+        }
+    )
     return env
 
 

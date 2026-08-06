@@ -12,6 +12,7 @@ import uuid
 
 import asyncpg
 from web3 import Web3
+from web3.logs import DISCARD
 
 from app.core.settings import get_settings
 from app.services.chain_codec import GREEN_ASSET_ABI, SPECIES_CODE, carbon_kg
@@ -21,8 +22,17 @@ logger = logging.getLogger(__name__)
 BACKOFF_SECONDS = [5, 15, 45]
 RECEIPT_TIMEOUT_S = 120
 
+# 單一實例部署：序列化所有 mint 呼叫以避免 nonce 競爭
+_mint_lock = asyncio.Lock()
+
 
 class ChainMintError(Exception):
+    pass
+
+
+class ChainAlreadyMinted(ChainMintError):
+    """geoHash 已上鏈但 DB 未回寫——不可重試，需人工對帳."""
+
     pass
 
 
@@ -55,6 +65,19 @@ def mint_plot_sync(
     contract = w3.eth.contract(
         address=Web3.to_checksum_address(contract_address), abi=GREEN_ASSET_ABI
     )
+
+    # 卡死 tx 復原：先查鏈上是否已 mint 過此 geoHash（receipt timeout / process 被 kill 導致
+    # DB 未回寫時，避免無窮重試撞 GeoHashAlreadyMinted revert）
+    try:
+        already_used = contract.functions.geoHashUsed(bytes.fromhex(geo_hash_hex)).call()
+    except Exception as exc:
+        raise ChainMintError(str(exc)) from exc
+    if already_used:
+        raise ChainAlreadyMinted(
+            "geoHash 已於鏈上 mint 但 DB 無紀錄——需人工對帳"
+            "（polygonscan 查 PlotMinted 事件取 token_id 後補寫 chain_records）"
+        )
+
     try:
         fn = contract.functions.mintPlot(
             account.address, bytes.fromhex(geo_hash_hex), carbon_kg_value, species_code
@@ -62,10 +85,14 @@ def mint_plot_sync(
         tx = fn.build_transaction(
             {
                 "from": account.address,
-                "nonce": w3.eth.get_transaction_count(account.address),
+                "nonce": w3.eth.get_transaction_count(account.address, "pending"),
                 "chainId": chain_id,
             }
         )
+        min_tip = w3.to_wei(25, "gwei")
+        if "maxPriorityFeePerGas" in tx and tx.get("maxPriorityFeePerGas", 0) < min_tip:
+            tx["maxPriorityFeePerGas"] = min_tip
+            tx["maxFeePerGas"] = max(tx.get("maxFeePerGas", 0), min_tip * 2)
         signed = account.sign_transaction(tx)
         tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=RECEIPT_TIMEOUT_S)
@@ -78,7 +105,7 @@ def mint_plot_sync(
         raise ChainMintError(f"交易 revert：{tx_hash.hex()}")
 
     token_id = None
-    for event in contract.events.PlotMinted().process_receipt(receipt):
+    for event in contract.events.PlotMinted().process_receipt(receipt, errors=DISCARD):
         token_id = int(event["args"]["tokenId"])
     if token_id is None:
         raise ChainMintError("receipt 中找不到 PlotMinted 事件")
@@ -140,52 +167,63 @@ async def mint_and_record(pool: asyncpg.Pool, plot_id: uuid.UUID) -> None:
             logger.info("plot 不存在或非 chain_pending，略過: %s", plot_id)
             return
 
-        for attempt in range(3):
-            try:
-                result = await asyncio.to_thread(
-                    _mint_fn,
-                    rpc_url=settings.chain_rpc_url,
-                    fallback_url=settings.chain_rpc_url_fallback,
-                    private_key=settings.minter_private_key,
-                    contract_address=settings.nft_contract_address,
-                    chain_id=settings.chain_id,
-                    geo_hash_hex=row["geo_hash"],
-                    carbon_kg_value=carbon_kg(float(row["co2e_tons"])),
-                    species_code=SPECIES_CODE[row["species"]],
-                )
-            except Exception as exc:
-                logger.warning(
-                    "mint 失敗 plot=%s attempt=%d error=%s", plot_id, attempt + 1, exc
-                )
-                async with pool.acquire() as conn:
-                    await conn.execute(
-                        _UPSERT_FAILURE_SQL, plot_id, attempt + 1, str(exc)[:500]
+        async with _mint_lock:
+            for attempt in range(3):
+                try:
+                    result = await asyncio.to_thread(
+                        _mint_fn,
+                        rpc_url=settings.chain_rpc_url,
+                        fallback_url=settings.chain_rpc_url_fallback,
+                        private_key=settings.minter_private_key,
+                        contract_address=settings.nft_contract_address,
+                        chain_id=settings.chain_id,
+                        geo_hash_hex=row["geo_hash"],
+                        carbon_kg_value=carbon_kg(float(row["co2e_tons"])),
+                        species_code=SPECIES_CODE[row["species"]],
                     )
-                if attempt < 2:
-                    await asyncio.sleep(BACKOFF_SECONDS[attempt])
-                continue
+                except ChainAlreadyMinted as exc:
+                    logger.error(
+                        "mint 偵測到 geoHash 已上鏈但 DB 未回寫 plot=%s error=%s", plot_id, exc
+                    )
+                    async with pool.acquire() as conn:
+                        await conn.execute(
+                            _UPSERT_FAILURE_SQL, plot_id, attempt + 1, str(exc)[:500]
+                        )
+                    return
+                except Exception as exc:
+                    logger.warning(
+                        "mint 失敗 plot=%s attempt=%d error=%s", plot_id, attempt + 1, exc
+                    )
+                    async with pool.acquire() as conn:
+                        await conn.execute(
+                            _UPSERT_FAILURE_SQL, plot_id, attempt + 1, str(exc)[:500]
+                        )
+                    if attempt < 2:
+                        await asyncio.sleep(BACKOFF_SECONDS[attempt])
+                    continue
 
-            async with pool.acquire() as conn:
-                await conn.execute(
-                    _UPSERT_SUCCESS_SQL,
+                async with pool.acquire() as conn:
+                    async with conn.transaction():
+                        await conn.execute(
+                            _UPSERT_SUCCESS_SQL,
+                            plot_id,
+                            result["contract_address"],
+                            result["token_id"],
+                            result["tx_hash"],
+                            settings.chain_id,
+                            attempt,
+                        )
+                        await conn.execute(_MARK_ON_CHAIN_SQL, plot_id)
+                logger.info(
+                    "mint 成功 plot=%s token_id=%s tx=%s",
                     plot_id,
-                    result["contract_address"],
                     result["token_id"],
                     result["tx_hash"],
-                    settings.chain_id,
-                    attempt,
                 )
-                await conn.execute(_MARK_ON_CHAIN_SQL, plot_id)
-            logger.info(
-                "mint 成功 plot=%s token_id=%s tx=%s",
-                plot_id,
-                result["token_id"],
-                result["tx_hash"],
-            )
-            return
+                return
 
-        logger.error(
-            "mint 三次皆失敗，plot=%s 停留 chain_pending（可用 admin retry 補鑄）", plot_id
-        )
+            logger.error(
+                "mint 三次皆失敗，plot=%s 停留 chain_pending（可用 admin retry 補鑄）", plot_id
+            )
     except Exception:
         logger.exception("mint_and_record 未預期例外 plot=%s", plot_id)

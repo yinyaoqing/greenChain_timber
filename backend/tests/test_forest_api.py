@@ -1,8 +1,10 @@
+import datetime
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
 
+import app.routers.forest as forest_router
 from app.core.auth import get_current_user_id
 from app.db.pool import get_conn
 from app.main import app
@@ -132,6 +134,38 @@ def test_area_too_small_422(client):
     resp = client.post("/api/forest", json=body)
     assert resp.status_code == 422
     assert resp.json()["detail"]["code"] == "area_out_of_range"
+
+
+def test_submit_schedules_mint_background_task(client, monkeypatch):
+    fake_plot_id = str(uuid.uuid4())
+    fake_plot = {
+        "id": fake_plot_id,
+        "area_ha": 1.2345,
+        "status": "chain_pending",
+        "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    }
+
+    async def fake_find_overlaps(conn, geometry):
+        return []
+
+    async def fake_insert_plot_with_estimates(conn, **kwargs):
+        return fake_plot
+
+    calls = []
+
+    async def fake_mint_and_record(pool, plot_id):
+        calls.append(plot_id)
+
+    monkeypatch.setattr(forest_router.queries, "find_overlaps", fake_find_overlaps)
+    monkeypatch.setattr(
+        forest_router.queries, "insert_plot_with_estimates", fake_insert_plot_with_estimates
+    )
+    monkeypatch.setattr(forest_router, "mint_and_record", fake_mint_and_record)
+
+    resp = client.post("/api/forest", json=VALID_BODY)
+
+    assert resp.status_code == 201
+    assert calls == [uuid.UUID(fake_plot_id)]
 
 
 def test_openapi_includes_body_schema():
