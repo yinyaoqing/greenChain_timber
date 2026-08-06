@@ -19,11 +19,9 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check .
       - name: Unit tests
+        # 環境變數由 tests/conftest.py setdefault 提供（勿在此覆蓋——會與測試常數不一致）；
         # 整合測試（test_*_integration.py）因無 TEST_DATABASE_URL 自動 skip
         run: uv run pytest -v
-        env:
-          DATABASE_URL: postgresql://invalid:invalid@127.0.0.1:1/invalid
-          SUPABASE_JWT_SECRET: ci-secret
 
   frontend:
     runs-on: ubuntu-latest
