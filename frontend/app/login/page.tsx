@@ -10,19 +10,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } =
-      mode === "signin"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+    setInfo(null);
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setBusy(false);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      router.replace("/draw");
+      return;
+    }
+    const { data, error } = await supabase.auth.signUp({ email, password });
     setBusy(false);
     if (error) {
       setError(error.message);
+      return;
+    }
+    if (!data.session) {
+      setError(null);
+      setInfo("註冊成功——請至信箱點擊確認連結後再登入");
       return;
     }
     router.replace("/draw");
@@ -52,6 +66,7 @@ export default function LoginPage() {
           className="w-full rounded-md border border-stone-300 px-3 py-2"
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
+        {info && <p className="text-sm text-emerald-600">{info}</p>}
         <button
           type="submit"
           disabled={busy}

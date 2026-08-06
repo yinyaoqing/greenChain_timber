@@ -94,6 +94,11 @@ export default function DrawPanel() {
       });
       map.addControl(draw as unknown as mapboxgl.IControl, "top-left");
       drawRef.current = draw;
+      map.on("draw.modechange" as never, (e: { mode?: string }) => {
+        if (e?.mode === "draw_polygon" && map.getPitch() > 10) {
+          map.easeTo({ pitch: 0, duration: 600 });
+        }
+      });
       map.on("draw.create" as never, () => {
         // 一次僅允許一個多邊形：保留最新
         const all = draw.getAll().features;
