@@ -46,6 +46,8 @@
 
 ## 注意事項
 
-- **Render 免費方案冷啟動 ~30–60 s**（規格書 R3）：W4 會設 UptimeRobot 每 10 分鐘 ping `/healthz`；Demo 前先手動開一次網址預熱
+- **Render 免費方案冷啟動 ~30–60 s**（規格書 R3）：已由 `.github/workflows/keepalive.yml`
+  每 10 分鐘 ping `/healthz` 保持喚醒（GitHub Actions cron，取代 UptimeRobot 免建帳號）；
+  cron 偶有延遲屬正常，Demo 前仍建議手動開一次網址預熱
 - **秘密紅線**：所有值只存 Vercel/Render 環境變數與本機 `.env`；`render.yaml` 僅宣告變數名（`sync: false`）
 - CI 的 frontend build 使用 dummy 環境變數（只為型別檢查與 prerender），正式值一律由 Vercel 注入
