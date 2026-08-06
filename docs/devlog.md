@@ -52,3 +52,15 @@
 - 版本紀錄：實際為 Next.js 16.3、recharts 3.10（計畫寫 15/2，程式碼已相應調整）；表單為點擊開啟而非自動彈出（UX 決策，記錄備查）
 - W3 待辦（審查遺留）：GET 401 導登入、conflict helpers 抽到 lib/、AuthGuard returnTo、CarbonChart 基準年改 created_at
 - 明天起：W3 區塊鏈計畫（Hardhat + GreenAssetNFT + chain_service）
+
+## 2026-08-07（續）— W3 程式碼完成，待 M3 部署驗證
+
+- W3 Tasks 1–7 完成（合約 8 測試、後端 79 tests、前端 lint/build 綠）；最終審查 4 個 Important 全修復：
+  already-minted 防卡死（geoHashUsed 預檢 + 不可重試錯誤）、成功回寫原子化、mint 序列化 + pending nonce、admin timing-safe 比較、gas tip 25 gwei 下限
+- 設計決策記錄：NFT mint 給平台錢包自身（規格 §9 允許，MVP 無使用者錢包）；metadata 端點公開屬設計（tokenURI 需可讀）
+- M3 檢查清單（最終審查追加）：
+  1) ETHERSCAN_API_KEY 需為 etherscan.io V2 multichain key（legacy polygonscan key 無效）；verify 失敗可改用 Polygonscan UI
+  2) 對帳程序：tx 已上鏈但 plot 卡 chain_pending 時——polygonscan 查 PlotMinted 事件取 token_id，手動補 chain_records + status
+  3) 首筆 mint pending > 2 分鐘：先查 gas tip 是否低於 Polygon 25 gwei 下限，再懷疑 RPC
+  4) retry_count 語意：成功時 = 成功前的失敗次數（首次即成功為 0）
+  5) Render 免費方案休眠會殺背景任務——W4 UptimeRobot 前，補鑄作業在本機執行較穩
