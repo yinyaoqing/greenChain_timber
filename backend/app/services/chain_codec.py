@@ -1,11 +1,13 @@
 """鏈上編碼純函式與最小 ABI（FR-5.2 / §9）。無 I/O，可獨立測試."""
 
+from decimal import ROUND_HALF_UP, Decimal
+
 SPECIES_CODE: dict[str, int] = {"taiwania": 1, "acacia": 2, "fraxinus": 3}
 
 
 def carbon_kg(co2e_tons: float) -> int:
-    """噸 -> 公斤取整（FR-5.2：×1000 避免浮點上鏈）."""
-    return int(round(co2e_tons * 1000))
+    """噸 -> 公斤取整（FR-5.2：×1000 避免浮點上鏈，四捨五入）."""
+    return int(Decimal(str(co2e_tons)).scaleb(3).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
 def geo_hash_bytes32(hex64: str) -> bytes:
@@ -46,6 +48,13 @@ GREEN_ASSET_ABI: list = [
                 ],
             }
         ],
+    },
+    {
+        "type": "function",
+        "name": "geoHashUsed",
+        "stateMutability": "view",
+        "inputs": [{"name": "", "type": "bytes32"}],
+        "outputs": [{"name": "", "type": "bool"}],
     },
     {
         "type": "event",
