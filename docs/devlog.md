@@ -64,3 +64,16 @@
   3) 首筆 mint pending > 2 分鐘：先查 gas tip 是否低於 Polygon 25 gwei 下限，再懷疑 RPC
   4) retry_count 語意：成功時 = 成功前的失敗次數（首次即成功為 0）
   5) Render 免費方案休眠會殺背景任務——W4 UptimeRobot 前，補鑄作業在本機執行較穩
+
+## 2026-08-07（晚）— M3 里程碑達成 ✅（W3 區塊鏈層全通）
+
+- GreenAssetNFT 部署 Amoy：`0x3fc1c4F56F7dc4A0b52Fd9B62dC1AEECdAce44F8`（部署耗 ~0.044 POL）
+- 實戰踩坑並修復：web3.py 需注入 ExtraDataToPOAMiddleware（Polygon/Amoy extraData 105 bytes）——
+  首次 mint 三次重試失敗證明了重試/退避/last_error 機制如設計運作，admin retry-pending 補鑄全數成功
+- 端到端：圈地 201 → 背景 mint → on_chain，token #1–#4 全部上鏈，tx receipt status=1
+- AT-5 完整演練：壞 RPC → 3 次重試失敗停留 chain_pending（last_error「所有 RPC 節點皆無法連線」）→
+  恢復 RPC + admin retry → 5 秒內轉 on_chain（token #4）
+- AT-6：verify_hash.py 4/4 MATCH（DB geo_hash = 重算 SHA-256 = 鏈上 geoHash）
+- chain-status 端點、NFT metadata 端點（UTF-8 正常）皆驗證通過
+- 網路備註：官方 rpc-amoy.polygon.technology 本機 DNS 解析失敗，改用 publicnode（主）+ drpc（備援）
+- 待辦（正式環境）：Render 補 4 個環境變數後正式站全通；前端詳情頁 Tx Hash 視覺確認
