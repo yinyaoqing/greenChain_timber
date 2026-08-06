@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.logging import setup_logging
 from app.core.settings import get_settings
 from app.db.pool import create_pool
+from app.routers.forest import router as forest_router
 
 
 @asynccontextmanager
@@ -25,6 +26,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(forest_router)
 
 
 @app.get("/healthz")
