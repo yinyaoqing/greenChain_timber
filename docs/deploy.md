@@ -4,7 +4,7 @@
 |---|---|---|---|
 | CI | GitHub Actions | 每次 push / PR | `backend`（ruff + pytest）+ `frontend`（eslint + build）兩個 job |
 | CD 前端 | Vercel | push main 自動部署 | ✅ 已綁定：https://green-chain-timber-wheat.vercel.app |
-| CD 後端 | Render Blueprint（`render.yaml`） | push main 自動部署 | 需一次性 Dashboard 綁定（下方步驟 B） |
+| CD 後端 | Render Blueprint（`render.yaml`） | push main 自動部署 | ✅ 已綁定：https://greenchain-backend-mp5a.onrender.com |
 
 ---
 
@@ -18,7 +18,7 @@
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://ywjlamzobgtsbdkabdse.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_...`（publishable key） |
-| `NEXT_PUBLIC_API_BASE_URL` | Render 後端網址（步驟 B 完成後回填，例 `https://greenchain-backend.onrender.com`） |
+| `NEXT_PUBLIC_API_BASE_URL` | `https://greenchain-backend-mp5a.onrender.com` |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | `pk.` 開頭的 Mapbox public token |
 
 4. Deploy。之後每次 push main 自動部署正式版，PR 自動出 Preview
