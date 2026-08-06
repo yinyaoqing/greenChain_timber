@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.core.auth import get_current_user_id
 
-SECRET = "test-secret"  # 與 conftest.py 的 SUPABASE_JWT_SECRET 一致
+SECRET = "test-secret-0123456789abcdefghijklmnopqrstuvwxyz"  # match conftest.py
 USER_ID = str(uuid.uuid4())
 
 
