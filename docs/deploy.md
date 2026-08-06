@@ -3,7 +3,7 @@
 | 層 | 工具 | 觸發 | 狀態 |
 |---|---|---|---|
 | CI | GitHub Actions | 每次 push / PR | `backend`（ruff + pytest）+ `frontend`（eslint + build）兩個 job |
-| CD 前端 | Vercel | push main 自動部署 | 需一次性 Dashboard 綁定（下方步驟 A） |
+| CD 前端 | Vercel | push main 自動部署 | ✅ 已綁定：https://green-chain-timber-wheat.vercel.app |
 | CD 後端 | Render Blueprint（`render.yaml`） | push main 自動部署 | 需一次性 Dashboard 綁定（下方步驟 B） |
 
 ---
@@ -33,7 +33,7 @@
 | `DATABASE_URL` | Supabase Session Pooler 連線字串（含 URL-encoded 密碼） |
 | `SUPABASE_URL` | `https://ywjlamzobgtsbdkabdse.supabase.co` |
 | `SUPABASE_JWT_SECRET` | 留空（本專案用 ES256/JWKS） |
-| `CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000`（步驟 C 加 Vercel 網域） |
+| `CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000,https://green-chain-timber-wheat.vercel.app` |
 
 3. Deploy 完成後記下網址（`https://greenchain-backend.onrender.com` 之類）
 
