@@ -74,3 +74,9 @@ export interface ForestSubmission {
   density: number;
   geometry: GeoJSON.Polygon;
 }
+
+export interface ChainStatus {
+  status: PlotStatus;
+  tx_hash: string | null;
+  token_id: number | null;
+}

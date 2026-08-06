@@ -6,7 +6,7 @@ import type mapboxgl from "mapbox-gl";
 import MapView from "@/components/MapView";
 import CarbonChart from "@/components/CarbonChart";
 import StatusBadge from "@/components/StatusBadge";
-import { getForest } from "@/lib/api";
+import { getChainStatus, getForest } from "@/lib/api";
 import type { PlotDetail } from "@/lib/types";
 import { SPECIES_LABEL } from "@/lib/types";
 
@@ -68,6 +68,18 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
       fitToPolygon(map, plot.geometry);
     }
   }, [map, plot]);
+
+  // chain_pending 時每 10 秒輪詢上鏈狀態；轉 on_chain 後重抓詳情
+  useEffect(() => {
+    if (!plot || plot.status !== "chain_pending") return;
+    const timer = setInterval(async () => {
+      const s = await getChainStatus(plot.id).catch(() => null);
+      if (s && s.status !== "chain_pending") {
+        getForest(plot.id).then((p) => p && setPlot(p)).catch(() => {});
+      }
+    }, 10_000);
+    return () => clearInterval(timer);
+  }, [plot]);
 
   if (loadError) {
     return (
@@ -144,13 +156,45 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
           <div className="rounded-xl border border-stone-200 bg-white p-5">
             <h2 className="font-semibold text-stone-800">鏈上憑證</h2>
             {plot.chain_record?.tx_hash ? (
-              <p className="mt-2 break-all text-sm text-emerald-700">
-                {plot.chain_record.tx_hash}
+              <dl className="mt-3 space-y-2 text-sm">
+                <div>
+                  <dt className="text-stone-500">Token ID</dt>
+                  <dd className="font-mono">#{plot.chain_record.token_id}</dd>
+                </div>
+                <div>
+                  <dt className="text-stone-500">合約地址</dt>
+                  <dd>
+                    <a
+                      href={`https://amoy.polygonscan.com/address/${plot.chain_record.contract_address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="break-all font-mono text-xs text-emerald-700 underline"
+                    >
+                      {plot.chain_record.contract_address}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-stone-500">Tx Hash（點擊至 Amoy 瀏覽器驗證）</dt>
+                  <dd>
+                    <a
+                      href={`https://amoy.polygonscan.com/tx/${plot.chain_record.tx_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="break-all font-mono text-xs text-emerald-700 underline"
+                    >
+                      {plot.chain_record.tx_hash}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            ) : plot.status === "chain_pending" ? (
+              <p className="mt-2 flex items-center gap-2 text-sm text-amber-700">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+                上鏈處理中——完成後將自動顯示 Tx Hash（每 10 秒更新）
               </p>
             ) : (
-              <p className="mt-2 text-sm text-amber-700">
-                ⛓️ 上鏈處理中——NFT 存證與 Tx Hash 查驗將於區塊鏈模組上線後顯示
-              </p>
+              <p className="mt-2 text-sm text-stone-500">尚無鏈上紀錄</p>
             )}
           </div>
         </aside>
