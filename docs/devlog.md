@@ -32,3 +32,14 @@
 4. 上線流程：套用 schema → 執行整合測試 → curl 三情境驗證 → 打上 `m1-backend` tag。
 
 ---
+
+## 2026-08-06（晚）— M1 里程碑達成 ✅
+
+- Supabase 專案建立（ref: ywjlamzobgtsbdkabdse，ap-southeast-1）；IPv4 網路採 Session Pooler 連線
+- 專案使用非對稱 JWT 簽章金鑰（ECC P-256）→ 後端已升級 ES256/JWKS 驗證（保留 HS256 相容）
+- schema.sql 套用成功且冪等；PostGIS 3.3.7；GIST 索引生效（EXPLAIN: Index Scan, 0.045 ms）
+- 整合測試 6/6 通過（修復 fixture：asyncpg Connection __slots__ → yield tuple）
+- 完整套件 61 passed（55 單元 + 6 整合）
+- curl 四情境全過（真實 ES256 JWT）：401 無 token／201 完整申報（6 筆估算）／409 重疊（overlap_ha 9.8602 + 衝突 GeoJSON）／422 自相交
+- 展示資料：「延文實驗林場 A 區」（台灣杉/15年/1500株/19.72 ha）已入庫，狀態 chain_pending
+- 明天起：W2 前端計畫（Next.js + Mapbox）
