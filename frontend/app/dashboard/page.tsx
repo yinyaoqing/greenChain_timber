@@ -7,6 +7,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { listForest } from "@/lib/api";
 import type { PlotListItem } from "@/lib/types";
 import { SPECIES_LABEL } from "@/lib/types";
+import { formatHa, formatCo2e } from "@/lib/format";
 
 function PlotCards() {
   const [plots, setPlots] = useState<PlotListItem[] | null>(null);
@@ -19,7 +20,18 @@ function PlotCards() {
   }, []);
 
   if (error) return <p className="text-red-600">載入失敗：{error}</p>;
-  if (plots === null) return <p className="text-stone-500">載入中…</p>;
+  if (plots === null) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-44 animate-pulse rounded-xl border border-stone-200 bg-stone-100"
+          />
+        ))}
+      </div>
+    );
+  }
   if (plots.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-stone-300 p-12 text-center">
@@ -49,12 +61,12 @@ function PlotCards() {
             </div>
             <div className="flex justify-between">
               <dt>面積</dt>
-              <dd>{p.area_ha.toFixed(4)} ha</dd>
+              <dd>{formatHa(p.area_ha)}</dd>
             </div>
             <div className="flex justify-between">
               <dt>當年固碳量</dt>
               <dd className="font-medium text-emerald-700">
-                {p.co2e_current !== null ? `${p.co2e_current.toFixed(2)} 噸 CO₂e/年` : "—"}
+                {p.co2e_current !== null ? formatCo2e(p.co2e_current) : "—"}
               </dd>
             </div>
           </dl>

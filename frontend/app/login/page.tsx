@@ -1,17 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useSession } from "@/hooks/useSession";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { session, loading: sessionLoading } = useSession();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!sessionLoading && session) router.replace("/draw");
+  }, [sessionLoading, session, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
