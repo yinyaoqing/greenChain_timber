@@ -21,3 +21,6 @@ contracts/cache/
 # 編輯器
 .vscode/
 .idea/
+
+# 本機秘密備忘（Vercel recovery codes 等）
+secrets.local.md
