@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.logging import setup_logging
 from app.core.settings import get_settings
 from app.db.pool import create_pool
+from app.routers.admin import router as admin_router
 from app.routers.forest import router as forest_router
+from app.routers.nft import router as nft_router
 
 
 @asynccontextmanager
@@ -28,6 +30,8 @@ app.add_middleware(
 )
 
 app.include_router(forest_router)
+app.include_router(admin_router)
+app.include_router(nft_router)
 
 
 @app.get("/healthz")

@@ -4,13 +4,14 @@ import uuid
 from typing import Literal
 
 import asyncpg
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.core.auth import get_current_user_id
 from app.db import queries
 from app.db.pool import get_conn
 from app.services.carbon_calc import estimate_carbon
+from app.services.chain_service import mint_and_record
 from app.services.geo_service import (
     GeometryError,
     geometry_hash,
@@ -35,6 +36,8 @@ class ForestSubmission(BaseModel):
 
 @router.post("", status_code=201)
 async def submit_forest(
+    request: Request,
+    background_tasks: BackgroundTasks,
     body: ForestSubmission,
     user_id: uuid.UUID = Depends(get_current_user_id),
     conn: asyncpg.Connection = Depends(get_conn),
@@ -86,6 +89,11 @@ async def submit_forest(
             status_code=409, detail={"conflicts": [], "message": "相同幾何的林區已存在"}
         ) from exc
 
+    # FR-5.3：入庫成功後非同步觸發上鏈（失敗不回滾、不阻塞回應）
+    background_tasks.add_task(
+        mint_and_record, request.app.state.pool, uuid.UUID(plot["id"])
+    )
+
     return {
         "plot": plot,
         "estimates": [
@@ -101,6 +109,26 @@ async def list_forest(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     return await queries.list_plots(conn)
+
+
+_CHAIN_STATUS_SQL = """
+select p.status, cr.tx_hash, cr.token_id
+from forest_plots p
+left join chain_records cr on cr.plot_id = p.id
+where p.id = $1
+"""
+
+
+@router.get("/{plot_id}/chain-status")
+async def chain_status(
+    plot_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    row = await conn.fetchrow(_CHAIN_STATUS_SQL, plot_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="plot not found")
+    return {"status": row["status"], "tx_hash": row["tx_hash"], "token_id": row["token_id"]}
 
 
 @router.get("/{plot_id}")
