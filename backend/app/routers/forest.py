@@ -4,8 +4,8 @@ import uuid
 from typing import Literal
 
 import asyncpg
-from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field, ValidationError
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from app.core.auth import get_current_user_id
 from app.db import queries
@@ -32,31 +32,12 @@ class ForestSubmission(BaseModel):
     geometry: dict
 
 
-class ValidatedSubmission(BaseModel):
-    body: ForestSubmission
-    area_ha: float
-
-    model_config = {"arbitrary_types_allowed": True}
-
-
-async def validate_submission(request: Request) -> ValidatedSubmission:
-    """解析並驗證請求本文（Pydantic 欄位 + 幾何 + 面積）—— 全部在觸及 DB 之前完成 422.
-
-    注意：FastAPI 會先解析所有 `Depends()` 子相依（依宣告順序），再驗證端點自身的
-    body 參數；若把 body 宣告成端點自身參數，`conn: Depends(get_conn)` 會在 Pydantic
-    422 之前就被呼叫。因此把「解析 + 全部驗證」包成一個獨立的 Depends，確保它在
-    `conn` 之前執行，驗證失敗時以 HTTPException 直接中止，`conn` 便不會被觸及。
-    """
-    try:
-        raw = await request.json()
-    except Exception as exc:  # pragma: no cover - 由 pydantic 422 涵蓋主要情境
-        raise HTTPException(status_code=422, detail="invalid JSON body") from exc
-
-    try:
-        body = ForestSubmission.model_validate(raw)
-    except ValidationError as exc:
-        raise HTTPException(status_code=422, detail=exc.errors()) from exc
-
+@router.post("", status_code=201)
+async def submit_forest(
+    body: ForestSubmission,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
     # 1. 幾何驗證（FR-3.3）—— 422
     try:
         validate_polygon(body.geometry)
@@ -75,18 +56,6 @@ async def validate_submission(request: Request) -> ValidatedSubmission:
                 "message": f"面積 {area_ha} ha 超出允許範圍 {MIN_AREA_HA}–{MAX_AREA_HA} ha",
             },
         )
-
-    return ValidatedSubmission(body=body, area_ha=area_ha)
-
-
-@router.post("", status_code=201)
-async def submit_forest(
-    validated: ValidatedSubmission = Depends(validate_submission),
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    conn: asyncpg.Connection = Depends(get_conn),
-):
-    body = validated.body
-    area_ha = validated.area_ha
 
     # 3. 防重疊（FR-3.1–3.2）—— 409
     conflicts = await queries.find_overlaps(conn, body.geometry)
