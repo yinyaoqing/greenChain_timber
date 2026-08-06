@@ -41,7 +41,11 @@ export async function submitForest(body: ForestSubmission): Promise<SubmitResult
   } catch {
     return { kind: "error", message: "無法連線後端服務，請確認 API 是否啟動" };
   }
-  if (res.status === 201) return { kind: "success", data: (await res.json()) as SubmitSuccess };
+  if (res.status === 201) {
+    const data = (await res.json().catch(() => null)) as SubmitSuccess | null;
+    if (!data) return { kind: "error", message: "伺服器回應格式異常" };
+    return { kind: "success", data };
+  }
   const payload = await res.json().catch(() => null);
   if (res.status === 409) {
     const conflicts = (payload?.detail?.conflicts ?? []) as Conflict[];
