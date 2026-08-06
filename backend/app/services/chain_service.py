@@ -13,6 +13,7 @@ import uuid
 import asyncpg
 from web3 import Web3
 from web3.logs import DISCARD
+from web3.middleware import ExtraDataToPOAMiddleware
 
 from app.core.settings import get_settings
 from app.services.chain_codec import GREEN_ASSET_ABI, SPECIES_CODE, carbon_kg
@@ -41,6 +42,8 @@ def _connect(rpc_url: str, fallback_url: str) -> Web3:
     for url in [u for u in (rpc_url, fallback_url) if u]:
         try:
             w3 = Web3(Web3.HTTPProvider(url, request_kwargs={"timeout": 30}))
+            # Polygon/Amoy 為 PoA 系鏈：extraData 105 bytes，需注入 POA middleware 才能解析區塊
+            w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
             if w3.is_connected():
                 return w3
         except Exception:
