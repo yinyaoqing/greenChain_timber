@@ -22,17 +22,23 @@ VALID_BODY = {
 }
 
 
+class _ForbiddenConn:
+    """任何屬性存取即失敗——保證驗證失敗路徑不使用資料庫."""
+
+    def __getattr__(self, name):
+        raise AssertionError(f"此測試不應觸及資料庫（嘗試存取 conn.{name}）")
+
+
 @pytest.fixture
 def client():
     async def fake_user():
         return uuid.uuid4()
 
-    async def fail_conn():
-        raise AssertionError("此測試不應觸及資料庫")
-        yield  # pragma: no cover
+    async def spy_conn():
+        yield _ForbiddenConn()
 
     app.dependency_overrides[get_current_user_id] = fake_user
-    app.dependency_overrides[get_conn] = fail_conn
+    app.dependency_overrides[get_conn] = spy_conn
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -45,7 +51,12 @@ def test_post_without_token_returns_401():
 
 def test_age_out_of_range_422(client):
     body = {**VALID_BODY, "avg_age": 0}
-    assert client.post("/api/forest", json=body).status_code == 422
+    resp = client.post("/api/forest", json=body)
+    assert resp.status_code == 422
+    payload = resp.json()
+    assert isinstance(payload["detail"], list)
+    assert "loc" in payload["detail"][0]
+    assert "msg" in payload["detail"][0]
 
 
 def test_density_out_of_range_422(client):
@@ -105,3 +116,14 @@ def test_area_too_small_422(client):
     resp = client.post("/api/forest", json=body)
     assert resp.status_code == 422
     assert resp.json()["detail"]["code"] == "area_out_of_range"
+
+
+def test_openapi_includes_body_schema():
+    with TestClient(app) as c:
+        spec = c.get("/openapi.json").json()
+
+    post_op = spec["paths"]["/api/forest"]["post"]
+    body_schema = post_op["requestBody"]["content"]["application/json"]["schema"]
+    ref = body_schema.get("$ref", "")
+    assert "ForestSubmission" in ref
+    assert "ForestSubmission" in spec["components"]["schemas"]
