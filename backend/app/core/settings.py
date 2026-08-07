@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     supabase_url: str = ""
     cors_origins: str = "http://localhost:3000"
+    # 正規表示式白名單（補明列清單不足處，如 Vercel Preview 的隨機子網域）；空字串 = 停用
+    cors_origin_regex: str = ""
 
     # 區塊鏈（W3；未設定時上鏈停用、申報流程照常）
     chain_rpc_url: str = "https://rpc-amoy.polygon.technology"

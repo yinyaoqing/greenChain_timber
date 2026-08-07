@@ -21,3 +21,6 @@ services:
         sync: false
       - key: CORS_ORIGINS
         sync: false
+      # 非機密：涵蓋本專案所有 Vercel 網域（正式 + Preview 隨機子網域）
+      - key: CORS_ORIGIN_REGEX
+        value: "https://green-chain-timber[a-z0-9-]*\\.vercel\\.app"
