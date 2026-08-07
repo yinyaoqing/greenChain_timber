@@ -77,3 +77,16 @@
 - chain-status 端點、NFT metadata 端點（UTF-8 正常）皆驗證通過
 - 網路備註：官方 rpc-amoy.polygon.technology 本機 DNS 解析失敗，改用 publicnode（主）+ drpc（備援）
 - 待辦（正式環境）：Render 補 4 個環境變數後正式站全通；前端詳情頁 Tx Hash 視覺確認
+
+## 2026-08-07（深夜）— M4 里程碑達成 ✅✅ 四週 MVP 收官
+
+- W4 Tasks 1–7 完成：keepalive（GH Actions cron）、展示資料整理（4 示範林區/三樹種）、
+  UI 打磨（skeleton/格式化/導向/404）、README 定稿、Demo 腳本（3+8 分鐘）、CORS Preview regex
+- **驗收 AT-1～AT-6 全數 PASS**（docs/acceptance_report.md）：AT-1 由使用者於正式站親測
+  （圈地→2 分鐘內上鏈→Amoy 查得 Success）；G1–G5 全部兌現
+- 里程碑回顧（原計畫 4 週，實際 2 天）：
+  M1 後端+空間資料庫（08-06）→ M2 前端地圖（08-07）→ M3 區塊鏈層（08-07）→ M4 整合上線（08-07）
+- 遺留清單（後續迭代）：農業部正式係數查證（carbon_coefficients.py PLACEHOLDER）、
+  GET 401 導登入/AuthGuard returnTo/CarbonChart 基準年（W2 deferred）、
+  overlap TOCTOU advisory lock（多使用者時）、GitHub Actions 事故期間的 CI 紅字待今日 run 洗綠、
+  Mapbox 用量監控、展示錢包餘額 ~0.04 POL（Demo 密集前補領）

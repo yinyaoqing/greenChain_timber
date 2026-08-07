@@ -10,7 +10,7 @@
 
 | 案例 | 執行方式 | 結果 | 證據摘要 |
 |---|---|---|---|
-| AT-1 Happy Path | 使用者於正式站瀏覽器操作 | ⏳ 待執行 | 步驟與驗收點見下；執行後更新本列 |
+| AT-1 Happy Path | 使用者於正式站瀏覽器操作 | ✅ PASS | 2026-08-07 使用者執行：201 成功卡+6 年曲線；≤2 分鐘轉 on_chain；Tx Hash 於 Amoy 瀏覽器查得 Success |
 | AT-2 重疊拒絕 | scripted 直打正式 API | ✅ PASS | HTTP 409、conflicts=1、overlap_ha=9.8602（與延文實驗林場 A 區）、含衝突 GeoJSON；資料庫無新增 |
 | AT-3 幾何無效 | scripted 直打正式 API | ✅ PASS | 自相交蝴蝶結多邊形 → HTTP 422、code=`self_intersection` |
 | AT-4 欄位驗證 | scripted 繞過前端直打 API | ✅ PASS | avg_age=0 → 422；density=50 → 422（前端 min/max 另有阻擋） |
@@ -42,9 +42,15 @@ token #1 延文實驗林場 A 區、#2 頭城示範林 D 區、#3 太平山示�
 步驟：登入 → 3D 地圖圈選約 5 ha 林地 → 台灣杉／15 年／1500 株 → 送出。
 驗收點：① 201 成功卡 + 6 年估算曲線；② 詳情頁「上鏈處理中」→ ≤ 2 分鐘自動轉 on_chain；
 ③ Tx Hash 點擊於 Amoy 瀏覽器查得交易（status = Success）。
-結果：待執行（前置：Render 需已設定 4 個 chain 環境變數，否則 ② 會停留處理中）。
+結果：PASS（2026-08-07 使用者於正式站執行，三項驗收點全數通過）。
+
+## 結論
+
+**六案例全數 PASS**——規格書 §12 驗收完成，MVP 目標 G1–G5 兌現：
+G1 端到端 Happy Path（AT-1）、G2 防重疊（AT-2）、G3 估算可追溯（公式版本隨估算入庫）、
+G4 上鏈可查驗（AT-1/AT-6）、G5 零成本上線（Vercel/Render/Supabase/Amoy 免費額度）。
 
 ## 簽核
 
 - scripted 項目（AT-2/3/4/6）與 AT-5 引用：Claude（controller），2026-08-07
-- AT-1 使用者驗收：待執行
+- AT-1 使用者驗收：yinyaoqing，2026-08-07
