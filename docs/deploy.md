@@ -35,6 +35,9 @@
 | `SUPABASE_JWT_SECRET` | 留空（本專案用 ES256/JWKS） |
 | `CORS_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000,https://green-chain-timber-wheat.vercel.app` |
 
+另 `render.yaml` 已內建 `CORS_ORIGIN_REGEX=https://green-chain-timber[a-z0-9-]*\.vercel\.app`，
+涵蓋所有 Vercel Preview 部署的隨機子網域（Preview 網址呼叫後端不再 CORS error）。
+
 3. Deploy 完成後記下網址（`https://greenchain-backend.onrender.com` 之類）
 
 ## C. 互相回填（兩邊都部署完後）
