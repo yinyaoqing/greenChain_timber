@@ -1,5 +1,5 @@
 # Render Blueprint — 後端自動部署（Dashboard → New → Blueprint → 選本 repo）
-# 環境變數值不進版控（sync: false = 於 Dashboard 首次部署時填入，見 docs/deploy.md）
+# 環境變數值不進版控（sync: false = 於 Dashboard 首次部署時填入，見 docs/engineering/deploy.md）
 services:
   - type: web
     name: greenchain-backend
