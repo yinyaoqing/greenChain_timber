@@ -24,3 +24,11 @@ contracts/cache/
 
 # 本機秘密備忘（Vercel recovery codes 等）
 secrets.local.md
+
+# 內部策略／對外送件文件（含談判草稿、財務與未送件計畫書）——repo 為 public，絕不進版控
+docs/external/
+docs/strategy/
+docs/*.md
+!docs/engineering/
+!docs/specs-p2/
+!docs/superpowers/
