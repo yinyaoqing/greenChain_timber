@@ -32,3 +32,6 @@ docs/*.md
 !docs/engineering/
 !docs/specs-p2/
 !docs/superpowers/
+
+# Claude Code 本機權限設定（不進版控）
+.claude/settings.local.json
