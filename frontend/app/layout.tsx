@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 
-export const SITE_DISCLAIMER = "本平台為技術展示原型，估算值不構成經查證之碳權";
+export const SITE_DISCLAIMER =
+  "本平台為技術展示原型｜呈現碳匯量測與監測數據，估算值不等於亦不構成經查證之減量額度";
 
 export const metadata: Metadata = {
   title: "綠鏈林匯 GreenChain Timber",
-  description: "數位 MRV 碳權透明化平台——圈地、估算、上鏈、驗證",
+  description: "森林碳匯數位 MRV 監測與存證平台——林區建檔、空間查核、固碳估算、上鏈驗證",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

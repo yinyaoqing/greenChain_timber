@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type mapboxgl from "mapbox-gl";
 import { submitForest } from "@/lib/api";
+import { loginHref } from "@/lib/authRedirect";
 import type { Species, SubmitSuccess } from "@/lib/types";
 import { SPECIES_LABEL } from "@/lib/types";
-import { clearConflicts, showConflicts } from "@/components/DrawPanel";
+import { clearConflicts, showConflicts } from "@/lib/conflictLayer";
 import CarbonChart from "@/components/CarbonChart";
 
 export interface PlotFormProps {
@@ -57,7 +58,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
         setPhase({ kind: "invalid", message: result.message });
         break;
       case "unauthorized":
-        router.replace("/login");
+        router.replace(loginHref("/draw"));
         break;
       case "error":
         setPhase({ kind: "invalid", message: result.message });
@@ -68,15 +69,15 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
   if (phase.kind === "done") {
     return (
       <div className="max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg bg-white/95 p-4 shadow-lg">
-        <h3 className="font-bold text-emerald-800">✅ 申報成功</h3>
+        <h3 className="font-bold text-emerald-800">✅ 建檔成功</h3>
         <p className="mt-1 text-sm text-stone-600">
           {name}｜{SPECIES_LABEL[species]}｜{phase.data.plot.area_ha.toFixed(4)} ha
         </p>
         <p className="mt-1 text-sm text-amber-700">⛓️ 上鏈處理中（區塊鏈功能將於後續版本啟用）</p>
         <div className="mt-3">
-          <CarbonChart estimates={phase.data.estimates} />
+          <CarbonChart estimates={phase.data.estimates} createdAt={phase.data.plot.created_at} />
         </div>
-        <p className="mt-1 text-xs text-stone-400">示範估算值，非查證碳權</p>
+        <p className="mt-1 text-xs text-stone-400">示範估算值，非經查證之減量額度</p>
         <div className="mt-3 flex gap-2">
           <Link
             href={`/dashboard/${phase.data.plot.id}`}
@@ -97,8 +98,8 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
 
   return (
     <form onSubmit={onSubmit} className="rounded-lg bg-white/95 p-4 shadow-lg">
-      <h3 className="font-bold text-stone-800">林區申報資料</h3>
-      <p className="mt-1 text-xs text-stone-500">圈選面積 {areaHa.toFixed(4)} ha</p>
+      <h3 className="font-bold text-stone-800">林區建檔資料</h3>
+      <p className="mt-1 text-xs text-stone-500">圈繪面積 {areaHa.toFixed(4)} ha</p>
 
       <label className="mt-3 block text-sm">
         林區名稱
@@ -170,7 +171,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
         disabled={phase.kind === "submitting"}
         className="mt-4 w-full rounded-md bg-emerald-700 py-2 text-white hover:bg-emerald-800 disabled:opacity-50"
       >
-        {phase.kind === "submitting" ? "送出中…" : "送出申報"}
+        {phase.kind === "submitting" ? "送出中…" : "送出建檔"}
       </button>
     </form>
   );

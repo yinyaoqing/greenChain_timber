@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # 正規表示式白名單（補明列清單不足處，如 Vercel Preview 的隨機子網域）；空字串 = 停用
     cors_origin_regex: str = ""
 
-    # 區塊鏈（W3；未設定時上鏈停用、申報流程照常）
+    # 區塊鏈（W3；未設定時上鏈停用、建檔流程照常）
     chain_rpc_url: str = "https://rpc-amoy.polygon.technology"
     chain_rpc_url_fallback: str = ""
     minter_private_key: str = ""

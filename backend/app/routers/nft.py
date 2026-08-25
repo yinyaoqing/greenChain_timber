@@ -26,7 +26,7 @@ async def nft_metadata(token_id: int, conn: asyncpg.Connection = Depends(get_con
     return {
         "name": f"GreenChain Timber #{token_id} — {row['name']}",
         "description": "綠鏈林匯林區碳資產存證。鏈上 geoHash 為林區邊界正規化 GeoJSON 之 "
-        "SHA-256 指紋；估算為示範性質，非查證碳權。",
+        "SHA-256 指紋；估算為示範性質，非經查證之減量額度。",
         "attributes": [
             {"trait_type": "樹種", "value": _SPECIES_ZH.get(row["species"], row["species"])},
             {"trait_type": "面積 (ha)", "value": float(row["area_ha"])},

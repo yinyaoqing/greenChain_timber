@@ -9,10 +9,10 @@ export default function Header() {
           🌲 綠鏈林匯
         </Link>
         <Link href="/draw" className="text-sm text-stone-600 hover:text-emerald-700">
-          圈地申報
+          林區建檔
         </Link>
         <Link href="/dashboard" className="text-sm text-stone-600 hover:text-emerald-700">
-          企業儀表板
+          儀表板
         </Link>
         <div className="ml-auto">
           <AuthButton />

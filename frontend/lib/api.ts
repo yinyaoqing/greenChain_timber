@@ -56,12 +56,21 @@ export async function submitForest(body: ForestSubmission): Promise<SubmitResult
   return { kind: "error", message: `伺服器錯誤（HTTP ${res.status}）` };
 }
 
+/** GET 端點的 401／無 token：由呼叫端導向登入頁（帶 returnTo），不顯示為載入錯誤 */
+export class UnauthorizedError extends Error {
+  constructor() {
+    super("未登入或登入已逾期");
+    this.name = "UnauthorizedError";
+  }
+}
+
 async function authedGet<T>(path: string): Promise<{ status: number; data: T | null }> {
   const token = await accessToken();
-  if (!token) throw new Error("未登入");
+  if (!token) throw new UnauthorizedError();
   const res = await fetch(`${BASE}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (res.status === 401) throw new UnauthorizedError();
   if (res.status === 404) return { status: 404, data: null };
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return { status: res.status, data: (await res.json()) as T };

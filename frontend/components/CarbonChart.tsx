@@ -11,8 +11,19 @@ import {
 } from "recharts";
 import type { YearEstimate } from "@/lib/types";
 
-export default function CarbonChart({ estimates }: { estimates: YearEstimate[] }) {
-  const baseYear = new Date().getFullYear();
+/** baseYear 以林區建檔時間（created_at）為準，估算曲線才不會隨瀏覽當下的年份漂移 */
+export default function CarbonChart({
+  estimates,
+  createdAt,
+}: {
+  estimates: YearEstimate[];
+  createdAt?: string;
+}) {
+  const parsed = createdAt ? new Date(createdAt) : null;
+  const baseYear =
+    parsed && !Number.isNaN(parsed.getTime())
+      ? parsed.getFullYear()
+      : new Date().getFullYear();
   const data = [...estimates]
     .sort((a, b) => a.year_offset - b.year_offset)
     .map((e) => ({ year: `${baseYear + e.year_offset}`, co2e: e.co2e_tons }));

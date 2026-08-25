@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type mapboxgl from "mapbox-gl";
 import MapView from "@/components/MapView";
 import CarbonChart from "@/components/CarbonChart";
 import StatusBadge from "@/components/StatusBadge";
-import { getChainStatus, getForest } from "@/lib/api";
+import { UnauthorizedError, getChainStatus, getForest } from "@/lib/api";
+import { loginHref } from "@/lib/authRedirect";
 import type { PlotDetail } from "@/lib/types";
 import { SPECIES_LABEL } from "@/lib/types";
 import { formatHa } from "@/lib/format";
@@ -54,12 +56,19 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
   const [plot, setPlot] = useState<PlotDetail | null | undefined>(undefined);
   const [loadError, setLoadError] = useState(false);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     getForest(plotId)
       .then(setPlot)
-      .catch(() => setLoadError(true));
-  }, [plotId]);
+      .catch((e: unknown) => {
+        if (e instanceof UnauthorizedError) {
+          router.replace(loginHref(`/dashboard/${plotId}`));
+          return;
+        }
+        setLoadError(true);
+      });
+  }, [plotId, router]);
 
   const onMapReady = useCallback((m: mapboxgl.Map) => setMap(m), []);
 
@@ -204,10 +213,10 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
       <div className="mt-6 rounded-xl border border-stone-200 bg-white p-5">
         <h2 className="font-semibold text-stone-800">固碳量預測（當年起 6 年）</h2>
         <p className="text-xs text-stone-400">
-          公式版本 {plot.estimates[0]?.formula_version ?? "—"}｜示範估算值，非查證碳權
+          公式版本 {plot.estimates[0]?.formula_version ?? "—"}｜示範估算值，非經查證之減量額度
         </p>
         <div className="mt-3">
-          <CarbonChart estimates={plot.estimates} />
+          <CarbonChart estimates={plot.estimates} createdAt={plot.created_at} />
         </div>
       </div>
     </div>

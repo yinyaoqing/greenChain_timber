@@ -7,48 +7,11 @@ import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import turfArea from "@turf/area";
 import MapView from "@/components/MapView";
 import PlotForm from "@/components/PlotForm";
-import type { Conflict } from "@/lib/types";
+import { clearConflicts } from "@/lib/conflictLayer";
 
 const MIN_AREA_HA = 0.1;
 const MAX_AREA_HA = 1000;
 const MAX_VERTICES = 500;
-
-const CONFLICT_SOURCE = "conflict-areas";
-
-/** 409 衝突區紅色高亮（FR-2.6）。Task 7 於送出流程呼叫 */
-export function showConflicts(map: mapboxgl.Map, conflicts: Conflict[]) {
-  clearConflicts(map);
-  map.addSource(CONFLICT_SOURCE, {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: conflicts.map((c) => ({
-        type: "Feature" as const,
-        properties: { plot_id: c.plot_id, overlap_ha: c.overlap_ha },
-        geometry: c.overlap_geojson,
-      })),
-    },
-  });
-  map.addLayer({
-    id: `${CONFLICT_SOURCE}-fill`,
-    type: "fill",
-    source: CONFLICT_SOURCE,
-    paint: { "fill-color": "#dc2626", "fill-opacity": 0.45 },
-  });
-  map.addLayer({
-    id: `${CONFLICT_SOURCE}-line`,
-    type: "line",
-    source: CONFLICT_SOURCE,
-    paint: { "line-color": "#b91c1c", "line-width": 2 },
-  });
-}
-
-export function clearConflicts(map: mapboxgl.Map) {
-  for (const id of [`${CONFLICT_SOURCE}-fill`, `${CONFLICT_SOURCE}-line`]) {
-    if (map.getLayer(id)) map.removeLayer(id);
-  }
-  if (map.getSource(CONFLICT_SOURCE)) map.removeSource(CONFLICT_SOURCE);
-}
 
 interface DrawState {
   geometry: GeoJSON.Polygon | null;
@@ -148,7 +111,7 @@ export default function DrawPanel() {
       <div className="absolute bottom-4 left-4 z-10 w-72 rounded-lg bg-white/95 p-4 shadow-lg">
         {geometry === null ? (
           <p className="text-sm text-stone-600">
-            點選左上 <span className="font-mono">▢</span> 多邊形工具，逐點圈選林地邊界，
+            點選左上 <span className="font-mono">▢</span> 多邊形工具，逐點圈繪林區邊界，
             雙擊閉合；可拖曳頂點修改、垃圾桶刪除重繪。
           </p>
         ) : (
@@ -165,7 +128,7 @@ export default function DrawPanel() {
                 onClick={() => setFormOpen(true)}
                 className="flex-1 rounded-md bg-emerald-700 py-2 text-sm text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                填寫申報資料
+                填寫林區資料
               </button>
               <button
                 onClick={resetDrawing}
@@ -178,7 +141,7 @@ export default function DrawPanel() {
         )}
       </div>
 
-      {/* 右側：申報表單（Task 7 實作 PlotForm 內容） */}
+      {/* 右側：林區建檔表單 */}
       {formOpen && geometry && (
         <div className="absolute right-4 top-4 z-10 w-80">
           <PlotForm

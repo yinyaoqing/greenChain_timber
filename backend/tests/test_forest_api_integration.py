@@ -80,7 +80,7 @@ def client_with_user():
 
 def test_full_submit_then_overlap_409(client_with_user):
     c = client_with_user
-    # 201：完整申報
+    # 201：完整建檔
     resp = c.post("/api/forest", json=_body(RING_A, "整合測試 A 區"))
     assert resp.status_code == 201, resp.text
     body = resp.json()

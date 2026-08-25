@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/hooks/useSession";
+import { safeReturnTo } from "@/lib/authRedirect";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const { session, loading: sessionLoading } = useSession();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -14,10 +15,12 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // 登入後的去向：AuthGuard 導過來時帶的 returnTo，否則回儀表板
+  const destination = safeReturnTo(useSearchParams().get("returnTo")) ?? "/dashboard";
 
   useEffect(() => {
-    if (!sessionLoading && session) router.replace("/draw");
-  }, [sessionLoading, session, router]);
+    if (!sessionLoading && session) router.replace(destination);
+  }, [sessionLoading, session, router, destination]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +34,7 @@ export default function LoginPage() {
         setError(error.message);
         return;
       }
-      router.replace("/draw");
+      router.replace(destination);
       return;
     }
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -45,7 +48,7 @@ export default function LoginPage() {
       setInfo("註冊成功——請至信箱點擊確認連結後再登入");
       return;
     }
-    router.replace("/draw");
+    router.replace(destination);
   }
 
   return (
@@ -88,5 +91,15 @@ export default function LoginPage() {
         {mode === "signin" ? "沒有帳號？註冊" : "已有帳號？登入"}
       </button>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<div className="flex h-64 items-center justify-center text-stone-500">載入中…</div>}
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
