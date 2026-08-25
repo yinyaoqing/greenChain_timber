@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,7 @@ from app.routers.nft import router as nft_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    app.state.started_at = datetime.now(UTC).isoformat(timespec="seconds")
     app.state.pool = await create_pool(get_settings().database_url)
     yield
     if app.state.pool is not None:
@@ -45,4 +47,10 @@ async def healthz():
             db = "up"
         except Exception:
             db = "down"
-    return {"status": "ok", "db": db}
+    return {
+        "status": "ok",
+        "db": db,
+        # 部署驗證用：線上實際跑的 commit 與本次啟動時間（冷啟後會更新）
+        "version": get_settings().build_version,
+        "started_at": getattr(app.state, "started_at", None),
+    }

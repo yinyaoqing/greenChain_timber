@@ -19,11 +19,19 @@ class Settings(BaseSettings):
     chain_id: int = 80002
     admin_token: str = ""
 
+    # 建置資訊（Render 於部署時自動注入 RENDER_GIT_COMMIT；本機為空）
+    render_git_commit: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def build_version(self) -> str:
+        """線上跑的是哪一版：Render 注入之 commit SHA 前 7 碼；未注入時回 local"""
+        return self.render_git_commit[:7] if self.render_git_commit else "local"
 
     @property
     def chain_configured(self) -> bool:
