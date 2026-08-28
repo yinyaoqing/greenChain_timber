@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useSession } from "@/hooks/useSession";
 import { loginHref } from "@/lib/authRedirect";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, loading } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations("common");
 
   useEffect(() => {
     if (loading || session) return;
-    // 於 effect 內讀 location，避免 useSearchParams 觸發 Suspense 邊界需求
-    router.replace(loginHref(window.location.pathname + window.location.search));
-  }, [loading, session, router]);
+    router.replace(loginHref(pathname + window.location.search));
+  }, [loading, session, router, pathname]);
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-stone-500">載入中…</div>;
+    return <div className="flex h-64 items-center justify-center text-stone-500">{t("loading")}</div>;
   }
   if (!session) return null;
   return <>{children}</>;

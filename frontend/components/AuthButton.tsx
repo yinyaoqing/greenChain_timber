@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/hooks/useSession";
 
 export default function AuthButton() {
   const { session, loading } = useSession();
   const router = useRouter();
+  const t = useTranslations("auth");
 
   if (loading) return <span className="text-sm text-stone-400">…</span>;
 
@@ -17,7 +18,7 @@ export default function AuthButton() {
         href="/login"
         className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm text-white hover:bg-emerald-800"
       >
-        登入
+        {t("login")}
       </Link>
     );
   }
@@ -31,7 +32,7 @@ export default function AuthButton() {
         }}
         className="rounded-md border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100"
       >
-        登出
+        {t("logout")}
       </button>
     </div>
   );

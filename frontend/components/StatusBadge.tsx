@@ -1,5 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { PlotStatus } from "@/lib/types";
-import { STATUS_LABEL } from "@/lib/types";
 
 const STYLE: Record<PlotStatus, string> = {
   active: "bg-stone-100 text-stone-700",
@@ -9,6 +11,7 @@ const STYLE: Record<PlotStatus, string> = {
 };
 
 export default function StatusBadge({ status }: { status: PlotStatus }) {
+  const t = useTranslations("status");
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${STYLE[status]}`}
@@ -16,7 +19,7 @@ export default function StatusBadge({ status }: { status: PlotStatus }) {
       {status === "chain_pending" && (
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
       )}
-      {STATUS_LABEL[status]}
+      {t(status)}
     </span>
   );
 }
