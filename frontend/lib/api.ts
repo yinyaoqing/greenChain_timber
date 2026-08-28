@@ -22,10 +22,10 @@ function parse422(detail: unknown): { code: string | null; message: string } {
       const loc = Array.isArray(d?.loc) ? d.loc.filter((p: unknown) => p !== "body").join(".") : "";
       return loc ? `${loc}: ${d?.msg ?? ""}` : String(d?.msg ?? "");
     });
-    return { code: null, message: msgs.join("；") || "欄位驗證失敗" };
+    return { code: null, message: msgs.join("; ") || "ERR_FIELD_VALIDATION" };
   }
   const obj = detail as { code?: string; message?: string } | null;
-  return { code: obj?.code ?? null, message: obj?.message ?? "資料驗證失敗" };
+  return { code: obj?.code ?? null, message: obj?.message ?? "ERR_DATA_VALIDATION" };
 }
 
 export async function submitForest(body: ForestSubmission): Promise<SubmitResult> {
@@ -39,11 +39,11 @@ export async function submitForest(body: ForestSubmission): Promise<SubmitResult
       body: JSON.stringify(body),
     });
   } catch {
-    return { kind: "error", message: "無法連線後端服務，請確認 API 是否啟動" };
+    return { kind: "error", message: "ERR_NETWORK" };
   }
   if (res.status === 201) {
     const data = (await res.json().catch(() => null)) as SubmitSuccess | null;
-    if (!data) return { kind: "error", message: "伺服器回應格式異常" };
+    if (!data) return { kind: "error", message: "ERR_BAD_RESPONSE" };
     return { kind: "success", data };
   }
   const payload = await res.json().catch(() => null);
@@ -53,13 +53,13 @@ export async function submitForest(body: ForestSubmission): Promise<SubmitResult
   }
   if (res.status === 422) return { kind: "invalid", ...parse422(payload?.detail) };
   if (res.status === 401) return { kind: "unauthorized" };
-  return { kind: "error", message: `伺服器錯誤（HTTP ${res.status}）` };
+  return { kind: "error", message: `ERR_SERVER:${res.status}` };
 }
 
 /** GET 端點的 401／無 token：由呼叫端導向登入頁（帶 returnTo），不顯示為載入錯誤 */
 export class UnauthorizedError extends Error {
   constructor() {
-    super("未登入或登入已逾期");
+    super("ERR_UNAUTHORIZED");
     this.name = "UnauthorizedError";
   }
 }

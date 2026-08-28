@@ -24,6 +24,24 @@ type Phase =
   | { kind: "conflict"; totalOverlapHa: number; count: number }
   | { kind: "invalid"; message: string };
 
+function errorText(t: ReturnType<typeof useTranslations>, message: string): string {
+  if (message.startsWith("ERR_SERVER:")) {
+    return t("errorServer", { status: message.split(":")[1] });
+  }
+  switch (message) {
+    case "ERR_FIELD_VALIDATION":
+      return t("errorFieldValidation");
+    case "ERR_DATA_VALIDATION":
+      return t("errorDataValidation");
+    case "ERR_NETWORK":
+      return t("errorNetwork");
+    case "ERR_BAD_RESPONSE":
+      return t("errorBadResponse");
+    default:
+      return message;
+  }
+}
+
 export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormProps) {
   const router = useRouter();
   const t = useTranslations("plotForm");
@@ -160,7 +178,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
       )}
       {phase.kind === "invalid" && (
         <div className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-800">
-          {phase.message}
+          {errorText(t, phase.message)}
         </div>
       )}
 

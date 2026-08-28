@@ -130,7 +130,12 @@
     "chainPending": "⛓️ Anchoring on-chain (blockchain features will be enabled in a later release)",
     "demoNote": "Demo estimates, not verified emission-reduction credits",
     "toDetail": "View plot details",
-    "drawAnother": "Draw another"
+    "drawAnother": "Draw another",
+    "errorFieldValidation": "Field validation failed",
+    "errorDataValidation": "Data validation failed",
+    "errorNetwork": "Could not reach the backend service. Please check that the API is running.",
+    "errorBadResponse": "Unexpected response format from the server",
+    "errorServer": "Server error (HTTP {status})"
   },
   "chart": {
     "yAxis": "t CO₂e/yr",

@@ -130,7 +130,12 @@
     "chainPending": "⛓️ 上鏈處理中（區塊鏈功能將於後續版本啟用）",
     "demoNote": "示範估算值，非經查證之減量額度",
     "toDetail": "前往林區詳情",
-    "drawAnother": "再圈一塊"
+    "drawAnother": "再圈一塊",
+    "errorFieldValidation": "欄位驗證失敗",
+    "errorDataValidation": "資料驗證失敗",
+    "errorNetwork": "無法連線後端服務，請確認 API 是否啟動",
+    "errorBadResponse": "伺服器回應格式異常",
+    "errorServer": "伺服器錯誤（HTTP {status}）"
   },
   "chart": {
     "yAxis": "噸 CO₂e/年",
