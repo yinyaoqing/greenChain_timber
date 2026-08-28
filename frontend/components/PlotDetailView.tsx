@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import type mapboxgl from "mapbox-gl";
 import MapView from "@/components/MapView";
 import CarbonChart from "@/components/CarbonChart";
@@ -10,7 +10,6 @@ import StatusBadge from "@/components/StatusBadge";
 import { UnauthorizedError, getChainStatus, getForest } from "@/lib/api";
 import { loginHref } from "@/lib/authRedirect";
 import type { PlotDetail } from "@/lib/types";
-import { SPECIES_LABEL } from "@/lib/types";
 import { formatHa } from "@/lib/format";
 
 function addPlotLayer(map: mapboxgl.Map, geometry: GeoJSON.Polygon) {
@@ -57,6 +56,10 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
   const [loadError, setLoadError] = useState(false);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const router = useRouter();
+  const t = useTranslations("plotDetail");
+  const tc = useTranslations("common");
+  const ts = useTranslations("species");
+  const locale = useLocale();
 
   useEffect(() => {
     getForest(plotId)
@@ -94,20 +97,20 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
   if (loadError) {
     return (
       <div className="p-12 text-center">
-        <p className="text-stone-600">無法連線後端服務，請確認 API 是否啟動</p>
+        <p className="text-stone-600">{t("backendDown")}</p>
         <Link href="/dashboard" className="mt-2 inline-block text-emerald-700 underline">
-          ← 回儀表板
+          {tc("backToDashboard")}
         </Link>
       </div>
     );
   }
-  if (plot === undefined) return <p className="p-8 text-stone-500">載入中…</p>;
+  if (plot === undefined) return <p className="p-8 text-stone-500">{tc("loading")}</p>;
   if (plot === null) {
     return (
       <div className="p-12 text-center">
-        <p className="text-stone-600">查無此林區</p>
+        <p className="text-stone-600">{t("notFound")}</p>
         <Link href="/dashboard" className="mt-2 inline-block text-emerald-700 underline">
-          ← 回儀表板
+          {tc("backToDashboard")}
         </Link>
       </div>
     );
@@ -118,7 +121,7 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
       <div className="flex items-center justify-between">
         <div>
           <Link href="/dashboard" className="text-sm text-stone-500 hover:text-emerald-700">
-            ← 回儀表板
+            {tc("backToDashboard")}
           </Link>
           <h1 className="mt-1 text-2xl font-bold text-emerald-900">{plot.name}</h1>
         </div>
@@ -132,30 +135,30 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
 
         <aside className="space-y-4">
           <div className="rounded-xl border border-stone-200 bg-white p-5">
-            <h2 className="font-semibold text-stone-800">林區屬性</h2>
+            <h2 className="font-semibold text-stone-800">{t("attrsTitle")}</h2>
             <dl className="mt-3 space-y-2 text-sm text-stone-600">
               <div className="flex justify-between">
-                <dt>樹種</dt>
-                <dd>{SPECIES_LABEL[plot.species]}</dd>
+                <dt>{t("species")}</dt>
+                <dd>{ts(plot.species)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>平均年齡</dt>
-                <dd>{plot.avg_age} 年</dd>
+                <dt>{t("avgAge")}</dt>
+                <dd>{plot.avg_age} {tc("yearsUnit")}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>種植密度</dt>
-                <dd>{plot.density} 株/公頃</dd>
+                <dt>{t("density")}</dt>
+                <dd>{plot.density} {tc("densityUnit")}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>面積</dt>
-                <dd>{formatHa(plot.area_ha)}</dd>
+                <dt>{t("area")}</dt>
+                <dd>{formatHa(plot.area_ha, locale)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>建立時間</dt>
-                <dd>{new Date(plot.created_at).toLocaleDateString("zh-TW")}</dd>
+                <dt>{t("createdAt")}</dt>
+                <dd>{new Date(plot.created_at).toLocaleDateString(locale)}</dd>
               </div>
               <div>
-                <dt>幾何指紋（SHA-256）</dt>
+                <dt>{t("geoHash")}</dt>
                 <dd className="mt-1 break-all font-mono text-xs text-stone-400">
                   {plot.geo_hash}
                 </dd>
@@ -164,15 +167,15 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
           </div>
 
           <div className="rounded-xl border border-stone-200 bg-white p-5">
-            <h2 className="font-semibold text-stone-800">鏈上憑證</h2>
+            <h2 className="font-semibold text-stone-800">{t("chainTitle")}</h2>
             {plot.chain_record?.tx_hash ? (
               <dl className="mt-3 space-y-2 text-sm">
                 <div>
-                  <dt className="text-stone-500">Token ID</dt>
+                  <dt className="text-stone-500">{t("tokenId")}</dt>
                   <dd className="font-mono">#{plot.chain_record.token_id}</dd>
                 </div>
                 <div>
-                  <dt className="text-stone-500">合約地址</dt>
+                  <dt className="text-stone-500">{t("contractAddress")}</dt>
                   <dd>
                     <a
                       href={`https://amoy.polygonscan.com/address/${plot.chain_record.contract_address}`}
@@ -185,7 +188,7 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-stone-500">Tx Hash（點擊至 Amoy 瀏覽器驗證）</dt>
+                  <dt className="text-stone-500">{t("txHashLabel")}</dt>
                   <dd>
                     <a
                       href={`https://amoy.polygonscan.com/tx/${plot.chain_record.tx_hash}`}
@@ -201,19 +204,19 @@ export default function PlotDetailView({ plotId }: { plotId: string }) {
             ) : plot.status === "chain_pending" ? (
               <p className="mt-2 flex items-center gap-2 text-sm text-amber-700">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                上鏈處理中——完成後將自動顯示 Tx Hash（每 10 秒更新）
+                {t("chainPendingHint")}
               </p>
             ) : (
-              <p className="mt-2 text-sm text-stone-500">尚無鏈上紀錄</p>
+              <p className="mt-2 text-sm text-stone-500">{t("noChainRecord")}</p>
             )}
           </div>
         </aside>
       </div>
 
       <div className="mt-6 rounded-xl border border-stone-200 bg-white p-5">
-        <h2 className="font-semibold text-stone-800">固碳量預測（當年起 6 年）</h2>
+        <h2 className="font-semibold text-stone-800">{t("estimatesTitle")}</h2>
         <p className="text-xs text-stone-400">
-          公式版本 {plot.estimates[0]?.formula_version ?? "—"}｜示範估算值，非經查證之減量額度
+          {t("formulaNote", { version: plot.estimates[0]?.formula_version ?? "—" })}
         </p>
         <div className="mt-3">
           <CarbonChart estimates={plot.estimates} createdAt={plot.created_at} />

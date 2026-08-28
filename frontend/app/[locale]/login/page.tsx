@@ -1,7 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/hooks/useSession";
 import { safeReturnTo } from "@/lib/authRedirect";
@@ -15,6 +17,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const t = useTranslations("auth");
   // 登入後的去向：AuthGuard 導過來時帶的 returnTo，否則回儀表板
   const destination = safeReturnTo(useSearchParams().get("returnTo")) ?? "/dashboard";
 
@@ -45,7 +48,7 @@ function LoginForm() {
     }
     if (!data.session) {
       setError(null);
-      setInfo("註冊成功——請至信箱點擊確認連結後再登入");
+      setInfo(t("signupSuccess"));
       return;
     }
     router.replace(destination);
@@ -54,7 +57,7 @@ function LoginForm() {
   return (
     <div className="mx-auto mt-16 max-w-sm rounded-xl border border-stone-200 bg-white p-8">
       <h1 className="text-xl font-bold text-emerald-900">
-        {mode === "signin" ? "登入" : "註冊"}
+        {mode === "signin" ? t("login") : t("signup")}
       </h1>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <input
@@ -71,7 +74,7 @@ function LoginForm() {
           minLength={6}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="密碼（至少 6 碼）"
+          placeholder={t("passwordPlaceholder")}
           className="w-full rounded-md border border-stone-300 px-3 py-2"
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -81,23 +84,24 @@ function LoginForm() {
           disabled={busy}
           className="w-full rounded-md bg-emerald-700 py-2 text-white hover:bg-emerald-800 disabled:opacity-50"
         >
-          {busy ? "處理中…" : mode === "signin" ? "登入" : "註冊"}
+          {busy ? t("processing") : mode === "signin" ? t("login") : t("signup")}
         </button>
       </form>
       <button
         onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
         className="mt-4 text-sm text-emerald-700 underline"
       >
-        {mode === "signin" ? "沒有帳號？註冊" : "已有帳號？登入"}
+        {mode === "signin" ? t("toSignup") : t("toSignin")}
       </button>
     </div>
   );
 }
 
 export default function LoginPage() {
+  const tc = useTranslations("common");
   return (
     <Suspense
-      fallback={<div className="flex h-64 items-center justify-center text-stone-500">載入中…</div>}
+      fallback={<div className="flex h-64 items-center justify-center text-stone-500">{tc("loading")}</div>}
     >
       <LoginForm />
     </Suspense>

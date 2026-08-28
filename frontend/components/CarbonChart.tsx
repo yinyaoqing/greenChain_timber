@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import type { YearEstimate } from "@/lib/types";
 
 /** baseYear 以林區建檔時間（created_at）為準，估算曲線才不會隨瀏覽當下的年份漂移 */
@@ -19,6 +20,7 @@ export default function CarbonChart({
   estimates: YearEstimate[];
   createdAt?: string;
 }) {
+  const t = useTranslations("chart");
   const parsed = createdAt ? new Date(createdAt) : null;
   const baseYear =
     parsed && !Number.isNaN(parsed.getTime())
@@ -36,9 +38,15 @@ export default function CarbonChart({
           <XAxis dataKey="year" tick={{ fontSize: 12 }} />
           <YAxis
             tick={{ fontSize: 12 }}
-            label={{ value: "噸 CO₂e/年", angle: -90, position: "insideLeft", fontSize: 12 }}
+            label={{ value: t("yAxis"), angle: -90, position: "insideLeft", fontSize: 12 }}
           />
-          <Tooltip formatter={(v) => (typeof v === 'number' ? [`${v.toFixed(4)} 噸 CO₂e`, "年固碳量"] : ["", ""])} />
+          <Tooltip
+            formatter={(v) =>
+              typeof v === "number"
+                ? [t("tooltipValue", { value: v.toFixed(4) }), t("tooltipLabel")]
+                : ["", ""]
+            }
+          />
           <Line
             type="monotone"
             dataKey="co2e"

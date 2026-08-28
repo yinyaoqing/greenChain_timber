@@ -6,7 +6,11 @@ import AuthGuard from "@/components/AuthGuard";
 
 const PlotDetailView = dynamic(() => import("@/components/PlotDetailView"), {
   ssr: false,
-  loading: () => <p className="p-8 text-stone-500">載入中…</p>,
+  loading: () => (
+    <div className="flex items-center justify-center p-8">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-700" />
+    </div>
+  ),
 });
 
 export default function PlotDetailPage({ params }: { params: Promise<{ id: string }> }) {

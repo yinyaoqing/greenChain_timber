@@ -1,20 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import AuthGuard from "@/components/AuthGuard";
 import StatusBadge from "@/components/StatusBadge";
 import { UnauthorizedError, listForest } from "@/lib/api";
 import { loginHref } from "@/lib/authRedirect";
 import type { PlotListItem } from "@/lib/types";
-import { SPECIES_LABEL } from "@/lib/types";
-import { formatHa, formatCo2e } from "@/lib/format";
+import { formatHa } from "@/lib/format";
 
 function PlotCards() {
   const [plots, setPlots] = useState<PlotListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
+  const ts = useTranslations("species");
+  const tf = useTranslations("format");
+  const locale = useLocale();
 
   useEffect(() => {
     listForest()
@@ -24,11 +28,11 @@ function PlotCards() {
           router.replace(loginHref("/dashboard"));
           return;
         }
-        setError(e instanceof Error ? e.message : "載入失敗");
+        setError(e instanceof Error ? e.message : tc("loadFailed"));
       });
-  }, [router]);
+  }, [router, tc]);
 
-  if (error) return <p className="text-red-600">載入失敗：{error}</p>;
+  if (error) return <p className="text-red-600">{t("loadFailedWith", { message: error })}</p>;
   if (plots === null) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,9 +48,9 @@ function PlotCards() {
   if (plots.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-stone-300 p-12 text-center">
-        <p className="text-stone-500">尚無林區資料</p>
+        <p className="text-stone-500">{t("empty")}</p>
         <Link href="/draw" className="mt-2 inline-block text-emerald-700 underline">
-          前往林區建檔 →
+          {t("emptyCta")}
         </Link>
       </div>
     );
@@ -65,17 +69,21 @@ function PlotCards() {
           </div>
           <dl className="mt-3 space-y-1 text-sm text-stone-600">
             <div className="flex justify-between">
-              <dt>樹種</dt>
-              <dd>{SPECIES_LABEL[p.species]}</dd>
+              <dt>{t("species")}</dt>
+              <dd>{ts(p.species)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt>面積</dt>
-              <dd>{formatHa(p.area_ha)}</dd>
+              <dt>{t("area")}</dt>
+              <dd>{formatHa(p.area_ha, locale)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt>當年固碳量</dt>
+              <dt>{t("co2eCurrent")}</dt>
               <dd className="font-medium text-emerald-700">
-                {p.co2e_current !== null ? formatCo2e(p.co2e_current) : "—"}
+                {p.co2e_current !== null
+                  ? tf("co2ePerYear", {
+                      value: p.co2e_current.toLocaleString(locale, { maximumFractionDigits: 2 }),
+                    })
+                  : "—"}
               </dd>
             </div>
           </dl>
@@ -86,13 +94,12 @@ function PlotCards() {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
   return (
     <AuthGuard>
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-emerald-900">林區監測儀表板</h1>
-        <p className="mt-1 text-sm text-stone-500">
-          已建檔林區的面積、樹種與固碳估算概況（估算值非查證額度）
-        </p>
+        <h1 className="text-2xl font-bold text-emerald-900">{t("title")}</h1>
+        <p className="mt-1 text-sm text-stone-500">{t("subtitle")}</p>
         <div className="mt-6">
           <PlotCards />
         </div>

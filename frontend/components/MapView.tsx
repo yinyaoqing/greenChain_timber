@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -16,6 +17,7 @@ export default function MapView({
   onReady?: (map: mapboxgl.Map) => void;
   className?: string;
 }) {
+  const t = useTranslations("draw");
   const containerRef = useRef<HTMLDivElement>(null);
   const onReadyRef = useRef(onReady);
   const [mapError, setMapError] = useState(false);
@@ -57,7 +59,7 @@ export default function MapView({
     <div ref={containerRef} className={className ?? "h-full w-full"} style={{ position: "relative" }}>
       {mapError && (
         <div className="absolute inset-0 flex items-center justify-center bg-stone-100 p-6 text-center text-sm text-stone-600">
-          地圖載入失敗——請確認 frontend/.env.local 的 NEXT_PUBLIC_MAPBOX_TOKEN 已填入有效 token 後重啟 dev server
+          {t("mapError")}
         </div>
       )}
     </div>

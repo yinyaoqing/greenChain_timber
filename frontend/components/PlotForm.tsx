@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type mapboxgl from "mapbox-gl";
 import { submitForest } from "@/lib/api";
 import { loginHref } from "@/lib/authRedirect";
 import type { Species, SubmitSuccess } from "@/lib/types";
-import { SPECIES_LABEL } from "@/lib/types";
 import { clearConflicts, showConflicts } from "@/lib/conflictLayer";
 import CarbonChart from "@/components/CarbonChart";
 
@@ -27,6 +26,8 @@ type Phase =
 
 export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormProps) {
   const router = useRouter();
+  const t = useTranslations("plotForm");
+  const ts = useTranslations("species");
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<Species>("taiwania");
   const [avgAge, setAvgAge] = useState(15);
@@ -69,27 +70,27 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
   if (phase.kind === "done") {
     return (
       <div className="max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg bg-white/95 p-4 shadow-lg">
-        <h3 className="font-bold text-emerald-800">✅ 建檔成功</h3>
+        <h3 className="font-bold text-emerald-800">{t("successTitle")}</h3>
         <p className="mt-1 text-sm text-stone-600">
-          {name}｜{SPECIES_LABEL[species]}｜{phase.data.plot.area_ha.toFixed(4)} ha
+          {name}｜{ts(species)}｜{phase.data.plot.area_ha.toFixed(4)} ha
         </p>
-        <p className="mt-1 text-sm text-amber-700">⛓️ 上鏈處理中（區塊鏈功能將於後續版本啟用）</p>
+        <p className="mt-1 text-sm text-amber-700">{t("chainPending")}</p>
         <div className="mt-3">
           <CarbonChart estimates={phase.data.estimates} createdAt={phase.data.plot.created_at} />
         </div>
-        <p className="mt-1 text-xs text-stone-400">示範估算值，非經查證之減量額度</p>
+        <p className="mt-1 text-xs text-stone-400">{t("demoNote")}</p>
         <div className="mt-3 flex gap-2">
           <Link
             href={`/dashboard/${phase.data.plot.id}`}
             className="flex-1 rounded-md bg-emerald-700 py-2 text-center text-sm text-white hover:bg-emerald-800"
           >
-            前往林區詳情
+            {t("toDetail")}
           </Link>
           <button
             onClick={onReset}
             className="rounded-md border border-stone-300 px-3 py-2 text-sm hover:bg-stone-100"
           >
-            再圈一塊
+            {t("drawAnother")}
           </button>
         </div>
       </div>
@@ -98,38 +99,36 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
 
   return (
     <form onSubmit={onSubmit} className="rounded-lg bg-white/95 p-4 shadow-lg">
-      <h3 className="font-bold text-stone-800">林區建檔資料</h3>
-      <p className="mt-1 text-xs text-stone-500">圈繪面積 {areaHa.toFixed(4)} ha</p>
+      <h3 className="font-bold text-stone-800">{t("title")}</h3>
+      <p className="mt-1 text-xs text-stone-500">{t("drawnArea", { area: areaHa.toFixed(4) })}</p>
 
       <label className="mt-3 block text-sm">
-        林區名稱
+        {t("name")}
         <input
           required
           maxLength={100}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="例：延文實驗林場 B 區"
+          placeholder={t("namePlaceholder")}
           className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2"
         />
       </label>
 
       <label className="mt-3 block text-sm">
-        樹種
+        {t("species")}
         <select
           value={species}
           onChange={(e) => setSpecies(e.target.value as Species)}
           className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2"
         >
-          {(Object.keys(SPECIES_LABEL) as Species[]).map((s) => (
-            <option key={s} value={s}>
-              {SPECIES_LABEL[s]}
-            </option>
+          {(["taiwania", "acacia", "fraxinus"] as Species[]).map((s) => (
+            <option key={s} value={s}>{ts(s)}</option>
           ))}
         </select>
       </label>
 
       <label className="mt-3 block text-sm">
-        平均年齡（1–100 年）
+        {t("avgAge")}
         <input
           type="number"
           required
@@ -142,7 +141,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
       </label>
 
       <label className="mt-3 block text-sm">
-        種植密度（100–10,000 株/公頃）
+        {t("density")}
         <input
           type="number"
           required
@@ -156,8 +155,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
 
       {phase.kind === "conflict" && (
         <div className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">
-          ⚠️ 與既有 {phase.count} 筆林區重疊（共 {phase.totalOverlapHa.toFixed(4)} ha，
-          地圖紅色區域）。請重繪避開衝突區域後再送出。
+          {t("conflict", { count: phase.count, total: phase.totalOverlapHa.toFixed(4) })}
         </div>
       )}
       {phase.kind === "invalid" && (
@@ -171,7 +169,7 @@ export default function PlotForm({ geometry, areaHa, map, onReset }: PlotFormPro
         disabled={phase.kind === "submitting"}
         className="mt-4 w-full rounded-md bg-emerald-700 py-2 text-white hover:bg-emerald-800 disabled:opacity-50"
       >
-        {phase.kind === "submitting" ? "送出中…" : "送出建檔"}
+        {phase.kind === "submitting" ? t("submitting") : t("submit")}
       </button>
     </form>
   );

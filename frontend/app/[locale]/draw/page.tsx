@@ -6,7 +6,9 @@ import AuthGuard from "@/components/AuthGuard";
 const DrawPanel = dynamic(() => import("@/components/DrawPanel"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-96 items-center justify-center text-stone-500">地圖載入中…</div>
+    <div className="flex h-96 items-center justify-center">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-700" />
+    </div>
   ),
 });
 

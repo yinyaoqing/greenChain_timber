@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type mapboxgl from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
@@ -20,6 +21,7 @@ interface DrawState {
 }
 
 export default function DrawPanel() {
+  const t = useTranslations("draw");
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
   const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
@@ -88,11 +90,11 @@ export default function DrawPanel() {
     geometry === null
       ? null
       : areaHa < MIN_AREA_HA
-        ? `面積 ${areaHa.toFixed(4)} ha 小於下限 ${MIN_AREA_HA} ha`
+        ? t("areaTooSmall", { area: areaHa.toFixed(4), min: MIN_AREA_HA })
         : areaHa > MAX_AREA_HA
-          ? `面積 ${areaHa.toFixed(1)} ha 超過上限 ${MAX_AREA_HA} ha`
+          ? t("areaTooLarge", { area: areaHa.toFixed(1), max: MAX_AREA_HA })
           : vertexCount > MAX_VERTICES
-            ? `頂點數 ${vertexCount} 超過上限 ${MAX_VERTICES}`
+            ? t("tooManyVertices", { count: vertexCount, max: MAX_VERTICES })
             : null;
   const ready = geometry !== null && areaError === null;
 
@@ -110,17 +112,14 @@ export default function DrawPanel() {
       {/* 左下：面積資訊卡 */}
       <div className="absolute bottom-4 left-4 z-10 w-72 rounded-lg bg-white/95 p-4 shadow-lg">
         {geometry === null ? (
-          <p className="text-sm text-stone-600">
-            點選左上 <span className="font-mono">▢</span> 多邊形工具，逐點圈繪林區邊界，
-            雙擊閉合；可拖曳頂點修改、垃圾桶刪除重繪。
-          </p>
+          <p className="text-sm text-stone-600">{t("hint")}</p>
         ) : (
           <>
-            <p className="text-sm text-stone-500">圈選面積</p>
+            <p className="text-sm text-stone-500">{t("selectedArea")}</p>
             <p className="text-2xl font-bold text-emerald-800">
-              {areaHa.toFixed(4)} <span className="text-base font-normal">公頃</span>
+              {areaHa.toFixed(4)} <span className="text-base font-normal">{t("hectare")}</span>
             </p>
-            <p className="mt-1 text-xs text-stone-500">頂點數 {vertexCount}</p>
+            <p className="mt-1 text-xs text-stone-500">{t("vertexCount", { count: vertexCount })}</p>
             {areaError && <p className="mt-2 text-sm text-red-600">{areaError}</p>}
             <div className="mt-3 flex gap-2">
               <button
@@ -128,13 +127,13 @@ export default function DrawPanel() {
                 onClick={() => setFormOpen(true)}
                 className="flex-1 rounded-md bg-emerald-700 py-2 text-sm text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                填寫林區資料
+                {t("fillForm")}
               </button>
               <button
                 onClick={resetDrawing}
                 className="rounded-md border border-stone-300 px-3 py-2 text-sm hover:bg-stone-100"
               >
-                重繪
+                {t("redraw")}
               </button>
             </div>
           </>
