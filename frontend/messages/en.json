@@ -1,1 +1,143 @@
-{ "header": { "brand": "🌲 GreenChain Timber" } }
+{
+  "meta": {
+    "title": "GreenChain Timber",
+    "description": "Digital MRV platform for forest carbon — plot registration, spatial verification, sequestration estimates, on-chain attestation",
+    "disclaimer": "Technology demonstration prototype | Displays carbon measurement and monitoring data; estimates are not, and do not constitute, verified emission-reduction credits"
+  },
+  "header": {
+    "brand": "🌲 GreenChain Timber",
+    "draw": "Register a Plot",
+    "dashboard": "Dashboard",
+    "localeSwitch": "中文"
+  },
+  "auth": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "signup": "Sign up",
+    "processing": "Processing…",
+    "passwordPlaceholder": "Password (min. 6 characters)",
+    "signupSuccess": "Signed up — please confirm via the link in your inbox, then sign in",
+    "toSignup": "No account? Sign up",
+    "toSignin": "Already have an account? Sign in"
+  },
+  "common": {
+    "loading": "Loading…",
+    "backToDashboard": "← Back to dashboard",
+    "loadFailed": "Failed to load",
+    "yearsUnit": "yrs",
+    "densityUnit": "trees/ha"
+  },
+  "home": {
+    "tagline": "Taiwan Forest Trust Commons · Open-source digital MRV infrastructure for forest carbon",
+    "title": "Every forest carbon claim, verifiable by anyone, for free",
+    "intro": "GreenChain Timber turns plot boundaries, sequestration estimates, and attestation records into open data any third party can independently verify — fully open source, with auditable coefficient and layer versions, building a foundation of verifiable honesty for Taiwan's natural carbon sinks.",
+    "ctaDashboard": "View demo dashboard",
+    "ctaDraw": "Register a plot",
+    "steps": {
+      "s1": { "title": "Digital plot registration", "desc": "Trace plot boundaries point-by-point on a 3D satellite map; geometry is normalized automatically" },
+      "s2": { "title": "Spatial overlap checks", "desc": "PostGIS compares against existing plots in real time; overlapping areas are highlighted in red on the spot" },
+      "s3": { "title": "Official formula estimates", "desc": "Estimates current and 5-year sequestration using the Ministry of Environment methodology framework and Ministry of Agriculture coefficients" },
+      "s4": { "title": "Attestation & public verification", "desc": "Geometry fingerprints and carbon tonnage go on-chain; anyone can recompute and compare" }
+    },
+    "audiencesTitle": "Who it's for",
+    "audiences": {
+      "a1": { "title": "Citizens & conservation groups", "desc": "Public verification without sign-in: anyone can recompute geometry fingerprints and check coefficient versions and estimation bases — holding forest carbon claims accountable without trusting any institution." },
+      "a2": { "title": "Aggregators & regulators", "desc": "A spatial-governance foundation for co-ops, associations, and production groups aggregating multiple forest owners — non-overlapping boundaries, double-counting prevention, and computable, attestable contribution shares." },
+      "a3": { "title": "Companies & environmental consultants", "desc": "A continuous monitoring dashboard for afforestation and adoption projects; every figure carries its formula version and attestation link, ready for sustainability reports, due diligence, and verification bodies to check independently." }
+    },
+    "boundaries": {
+      "title": "What we don't do (positioning & boundaries)",
+      "b1Strong": "Carbon sinks ≠ carbon credits.",
+      "b1": "This platform presents measurement and monitoring data for carbon storage and sequestration; estimates are not, and do not constitute, verified emission-reduction credits.",
+      "b2Strong": "No monetization claims for natural forests.",
+      "b2": "For natural and secondary forests, the platform provides carbon-storage monitoring and ecological-value display only, with no carbon-credit monetization claims.",
+      "b3Strong": "No credit trading.",
+      "b3": "Trading of emission-reduction credits is regulated by the competent authority; this platform takes no part in matching or commissions, providing only the open-data trust infrastructure that precedes credit issuance.",
+      "b4Strong": "Eligibility disclosed honestly.",
+      "b4": "In Taiwan, voluntary reduction projects may only be applied for by businesses, governments, and associations — not individuals; smallholders participate via aggregators. This platform is a data foundation for companies and aggregators, not a personal monetization channel."
+    }
+  },
+  "notFound": {
+    "title": "This forest could not be found",
+    "desc": "The page does not exist or has been removed.",
+    "backHome": "Back to home"
+  },
+  "species": {
+    "taiwania": "Taiwania",
+    "acacia": "Taiwan acacia",
+    "fraxinus": "Griffith's ash"
+  },
+  "status": {
+    "active": "Registered",
+    "chain_pending": "Anchoring on-chain",
+    "on_chain": "On-chain",
+    "rejected": "Rejected"
+  },
+  "dashboard": {
+    "title": "Plot Monitoring Dashboard",
+    "subtitle": "Area, species, and sequestration estimates for registered plots (estimates are not verified credits)",
+    "loadFailedWith": "Failed to load: {message}",
+    "empty": "No plots yet",
+    "emptyCta": "Register a plot →",
+    "species": "Species",
+    "area": "Area",
+    "co2eCurrent": "Current-year CO₂e"
+  },
+  "plotDetail": {
+    "backendDown": "Cannot reach the backend service — please check that the API is running",
+    "notFound": "Plot not found",
+    "attrsTitle": "Plot Attributes",
+    "species": "Species",
+    "avgAge": "Average age",
+    "density": "Planting density",
+    "area": "Area",
+    "createdAt": "Created",
+    "geoHash": "Geometry fingerprint (SHA-256)",
+    "chainTitle": "On-chain Certificate",
+    "tokenId": "Token ID",
+    "contractAddress": "Contract address",
+    "txHashLabel": "Tx Hash (click to verify on the Amoy explorer)",
+    "chainPendingHint": "Anchoring on-chain — the Tx Hash will appear automatically once complete (refreshes every 10 s)",
+    "noChainRecord": "No on-chain record yet",
+    "estimatesTitle": "Sequestration Forecast (6 years from registration)",
+    "formulaNote": "Formula version {version} | Demo estimates, not verified emission-reduction credits"
+  },
+  "draw": {
+    "mapLoading": "Loading map…",
+    "mapError": "Map failed to load — make sure NEXT_PUBLIC_MAPBOX_TOKEN in frontend/.env.local holds a valid token, then restart the dev server",
+    "hint": "Click the ▢ polygon tool (top-left) and trace the plot boundary point by point; double-click to close. Drag vertices to adjust, or use the trash icon to delete and redraw.",
+    "selectedArea": "Selected area",
+    "hectare": "ha",
+    "vertexCount": "{count} vertices",
+    "areaTooSmall": "Area {area} ha is below the {min} ha minimum",
+    "areaTooLarge": "Area {area} ha exceeds the {max} ha maximum",
+    "tooManyVertices": "{count} vertices exceed the maximum of {max}",
+    "fillForm": "Fill in plot details",
+    "redraw": "Redraw"
+  },
+  "plotForm": {
+    "title": "Plot Registration",
+    "drawnArea": "Drawn area {area} ha",
+    "name": "Plot name",
+    "namePlaceholder": "e.g. Yanwen Experimental Forest, Block B",
+    "species": "Species",
+    "avgAge": "Average age (1–100 years)",
+    "density": "Planting density (100–10,000 trees/ha)",
+    "conflict": "⚠️ Overlaps {count} existing plot(s) ({total} ha total, shown in red on the map). Please redraw to avoid the conflict area, then resubmit.",
+    "submitting": "Submitting…",
+    "submit": "Submit",
+    "successTitle": "✅ Plot registered",
+    "chainPending": "⛓️ Anchoring on-chain (blockchain features will be enabled in a later release)",
+    "demoNote": "Demo estimates, not verified emission-reduction credits",
+    "toDetail": "View plot details",
+    "drawAnother": "Draw another"
+  },
+  "chart": {
+    "yAxis": "t CO₂e/yr",
+    "tooltipValue": "{value} t CO₂e",
+    "tooltipLabel": "Annual sequestration"
+  },
+  "format": {
+    "co2ePerYear": "{value} t CO₂e/yr"
+  }
+}

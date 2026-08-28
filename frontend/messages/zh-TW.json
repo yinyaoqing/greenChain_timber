@@ -1,1 +1,143 @@
-{ "header": { "brand": "🌲 綠鏈林匯" } }
+{
+  "meta": {
+    "title": "綠鏈林匯 GreenChain Timber",
+    "description": "森林碳匯數位 MRV 監測與存證平台——林區建檔、空間查核、固碳估算、上鏈驗證",
+    "disclaimer": "本平台為技術展示原型｜呈現碳匯量測與監測數據，估算值不等於亦不構成經查證之減量額度"
+  },
+  "header": {
+    "brand": "🌲 綠鏈林匯",
+    "draw": "林區建檔",
+    "dashboard": "儀表板",
+    "localeSwitch": "EN"
+  },
+  "auth": {
+    "login": "登入",
+    "logout": "登出",
+    "signup": "註冊",
+    "processing": "處理中…",
+    "passwordPlaceholder": "密碼（至少 6 碼）",
+    "signupSuccess": "註冊成功——請至信箱點擊確認連結後再登入",
+    "toSignup": "沒有帳號？註冊",
+    "toSignin": "已有帳號？登入"
+  },
+  "common": {
+    "loading": "載入中…",
+    "backToDashboard": "← 回儀表板",
+    "loadFailed": "載入失敗",
+    "yearsUnit": "年",
+    "densityUnit": "株/公頃"
+  },
+  "home": {
+    "tagline": "台灣森林信任公地 · 開源的森林碳匯數位 MRV 公共基礎設施",
+    "title": "讓每一筆森林碳匯主張，任何人都能免費驗證",
+    "intro": "綠鏈林匯把林區邊界、固碳估算與存證紀錄，變成任何第三方都能自行核對的公開資料——原始碼全開源、係數與圖層版本可稽核，為台灣的自然碳匯立起「可驗證的誠實」底層。",
+    "ctaDashboard": "檢視示範林區儀表板",
+    "ctaDraw": "林區數位建檔",
+    "steps": {
+      "s1": { "title": "林區數位建檔", "desc": "3D 衛星地圖上逐點圈繪林區邊界，幾何自動正規化" },
+      "s2": { "title": "空間防重疊查核", "desc": "PostGIS 即時比對既有林區，重疊區塊當場紅色標示" },
+      "s3": { "title": "官方公式估算", "desc": "依環境部方法學架構與農業部係數估算當年與未來 5 年固碳量" },
+      "s4": { "title": "存證與公開查驗", "desc": "幾何指紋與碳噸數上鏈，任何人可自行重算比對" }
+    },
+    "audiencesTitle": "誰在使用",
+    "audiences": {
+      "a1": { "title": "公民與保育組織", "desc": "免登入的公開驗證：任何人可重算幾何指紋、核對係數版本與估算依據——監督森林碳匯主張，不需要相信任何機構。" },
+      "a2": { "title": "聚合單位與主管機關", "desc": "產銷班、合作社、公協會聚合多位林主時的空間治理底層——邊界互不侵犯、防重複申報、貢獻比例可計算可存證。" },
+      "a3": { "title": "企業與環境顧問", "desc": "造林與認養專案的持續監測儀表板；每個數字附公式版本與存證連結，供永續報告書、盡職調查與查驗機構自行核對。" }
+    },
+    "boundaries": {
+      "title": "我們不做什麼（定位與界線）",
+      "b1Strong": "碳匯 ≠ 碳權。",
+      "b1": "本平台呈現的是碳儲存與固碳量的量測與監測數據，估算值不等於、也不構成經查證之減量額度。",
+      "b2Strong": "天然林不談變現。",
+      "b2": "對天然林與次生林場景，本平台僅提供碳儲存監測與生態價值展示，不涉及任何碳權變現主張。",
+      "b3Strong": "不碰額度交易。",
+      "b3": "減量額度之買賣屬主管機關規範之交易行為；本平台不參與額度交易之撮合與抽成，僅提供額度產生前的公開數據信任基礎設施。",
+      "b4Strong": "申請資格如實揭露。",
+      "b4": "我國自願減量專案之申請人限事業、各級政府與公協會等機構，個人不得逕行申請；小林主須經聚合單位參與——本平台定位為企業與聚合單位的數據底層，而非個人變現管道。"
+    }
+  },
+  "notFound": {
+    "title": "找不到這片森林",
+    "desc": "頁面不存在或已被移除。",
+    "backHome": "回首頁"
+  },
+  "species": {
+    "taiwania": "台灣杉",
+    "acacia": "相思樹",
+    "fraxinus": "光臘樹"
+  },
+  "status": {
+    "active": "已建檔",
+    "chain_pending": "上鏈處理中",
+    "on_chain": "已上鏈",
+    "rejected": "已駁回"
+  },
+  "dashboard": {
+    "title": "林區監測儀表板",
+    "subtitle": "已建檔林區的面積、樹種與固碳估算概況（估算值非查證額度）",
+    "loadFailedWith": "載入失敗：{message}",
+    "empty": "尚無林區資料",
+    "emptyCta": "前往林區建檔 →",
+    "species": "樹種",
+    "area": "面積",
+    "co2eCurrent": "當年固碳量"
+  },
+  "plotDetail": {
+    "backendDown": "無法連線後端服務，請確認 API 是否啟動",
+    "notFound": "查無此林區",
+    "attrsTitle": "林區屬性",
+    "species": "樹種",
+    "avgAge": "平均年齡",
+    "density": "種植密度",
+    "area": "面積",
+    "createdAt": "建立時間",
+    "geoHash": "幾何指紋（SHA-256）",
+    "chainTitle": "鏈上憑證",
+    "tokenId": "Token ID",
+    "contractAddress": "合約地址",
+    "txHashLabel": "Tx Hash（點擊至 Amoy 瀏覽器驗證）",
+    "chainPendingHint": "上鏈處理中——完成後將自動顯示 Tx Hash（每 10 秒更新）",
+    "noChainRecord": "尚無鏈上紀錄",
+    "estimatesTitle": "固碳量預測（當年起 6 年）",
+    "formulaNote": "公式版本 {version}｜示範估算值，非經查證之減量額度"
+  },
+  "draw": {
+    "mapLoading": "地圖載入中…",
+    "mapError": "地圖載入失敗——請確認 frontend/.env.local 的 NEXT_PUBLIC_MAPBOX_TOKEN 已填入有效 token 後重啟 dev server",
+    "hint": "點選左上 ▢ 多邊形工具，逐點圈繪林區邊界，雙擊閉合；可拖曳頂點修改、垃圾桶刪除重繪。",
+    "selectedArea": "圈選面積",
+    "hectare": "公頃",
+    "vertexCount": "頂點數 {count}",
+    "areaTooSmall": "面積 {area} ha 小於下限 {min} ha",
+    "areaTooLarge": "面積 {area} ha 超過上限 {max} ha",
+    "tooManyVertices": "頂點數 {count} 超過上限 {max}",
+    "fillForm": "填寫林區資料",
+    "redraw": "重繪"
+  },
+  "plotForm": {
+    "title": "林區建檔資料",
+    "drawnArea": "圈繪面積 {area} ha",
+    "name": "林區名稱",
+    "namePlaceholder": "例：延文實驗林場 B 區",
+    "species": "樹種",
+    "avgAge": "平均年齡（1–100 年）",
+    "density": "種植密度（100–10,000 株/公頃）",
+    "conflict": "⚠️ 與既有 {count} 筆林區重疊（共 {total} ha，地圖紅色區域）。請重繪避開衝突區域後再送出。",
+    "submitting": "送出中…",
+    "submit": "送出建檔",
+    "successTitle": "✅ 建檔成功",
+    "chainPending": "⛓️ 上鏈處理中（區塊鏈功能將於後續版本啟用）",
+    "demoNote": "示範估算值，非經查證之減量額度",
+    "toDetail": "前往林區詳情",
+    "drawAnother": "再圈一塊"
+  },
+  "chart": {
+    "yAxis": "噸 CO₂e/年",
+    "tooltipValue": "{value} 噸 CO₂e",
+    "tooltipLabel": "年固碳量"
+  },
+  "format": {
+    "co2ePerYear": "{value} 噸 CO₂e/年"
+  }
+}
